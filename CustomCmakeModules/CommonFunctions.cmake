@@ -72,3 +72,37 @@ function(add_shared_library NAME VERSION)
     # # Install header
     # install(FILES inc/${PROJECT_NAME}.hpp TYPE INCLUDE)
 endfunction()
+
+
+# additional target to perform clang-format run, requires clang-format
+
+# get all project files
+file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
+# foreach (SOURCE_FILE ${ALL_SOURCE_FILES})
+#     string(FIND ${SOURCE_FILE} ${PROJECT_TRDPARTY_DIR} PROJECT_TRDPARTY_DIR_FOUND)
+#     if (NOT ${PROJECT_TRDPARTY_DIR_FOUND} EQUAL -1)
+#         list(REMOVE_ITEM ALL_SOURCE_FILES ${SOURCE_FILE})
+#     endif ()
+# endforeach ()
+
+add_custom_target(
+        clangformat
+        COMMAND "C:/Users/Siebenou/Documents/Projects/C++/Tools/winlibs-x86_64-mcf-seh-gcc-13.2.0-llvm-16.0.6-mingw-w64ucrt-11.0.1-r2/mingw64/bin/clang-format.exe"
+        -style=LLVM
+        -i
+        ${ALL_SOURCE_FILES}
+)
+
+
+
+add_custom_target(
+        cppcheck
+        COMMAND /usr/bin/cppcheck
+        --enable=warning,performance,portability,information,missingInclude
+        --std=c++11
+        --library=qt.cfg
+        --template="[{severity}][{id}] {message} {callstack} \(On {file}:{line}\)"
+        --verbose
+        --quiet
+        ${ALL_SOURCE_FILES}
+)

@@ -17,10 +17,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                 -fivopts         
                 -ftrivial-auto-var-init=zero   
                 -flimit-function-alignment
-                # -fprofile-use
                 -ftracer
                 -fstdarg-opt
-                # -fsection-anchors
+
+                #### Available in GNU plateform
+                #-fprofile-use
+                #-fsection-anchors
         )
         message("GCC RELEASE options Flags added")
         
@@ -33,65 +35,58 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
                 -fno-eliminate-unused-debug-types
                 -gvariable-location-views
                 -ftrivial-auto-var-init=zero
-                -fvtv-debug            
-                -Q
+                -fvtv-debug                            
                 -fmem-report
                 -fstack-usage
                 -fstats
-                -dumpmachine
-                -dumpfullversion
-
+                # -Q  N.B: Build is too long
+                
         )
         message("GCC RELEASE WITH DEBUG INFO options Flags added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
         add_compile_options(
-                # -g
-                # -ggdb
-                # -fvar-tracking
-                # -ginline-points
-                # -gstatement-frontiers
-                # -gvariable-location-views
-                # -fno-eliminate-unused-debug-types
-                # -fno-eliminate-unused-debug-symbols
-                # -O0
-                # -ftrivial-auto-var-init=zero
-                # # -pg
-                # # -p
-                # # --coverage
-                # -fprofile-abs-path
-                # # -fsanitize=kernel-hwaddress
-                # # -fsanitize=shadow-call-stack
-                # -fvtv-debug
-                # -freport-bug
-                # -fdump-earlydebug
-                # -fdump-passes
-                # -Q
-                # -fmem-report
-                # -flto-report
-                # -fstack-usage
-                # -fstats         
+                -g
+                -ggdb
+                -fvar-tracking
+                -ginline-points
+                -gstatement-frontiers
+                -gvariable-location-views
+                -fno-eliminate-unused-debug-types
+                -fno-eliminate-unused-debug-symbols
+                -O0
+                -ftrivial-auto-var-init=zero
+                -fprofile-abs-path                
+                -fvtv-debug
+                -freport-bug
+                -fdump-earlydebug
+                -fdump-passes
+                -fmem-report
+                -flto-report
+                -fstack-usage
+                -fstats         
                 -fsanitize=pointer-overflow      
+
+                # --coverage
+                # -Q  N.B: Build is too long
+
+                #### Available in GNU plateform
+                #-pg
+                #-p
         )
         message("GCC DEBUG options Flags added")
 endif()       
         
 #---------------------------------------------------------Compile Link options--------------------------------------------------------
 add_link_options(
-
         -pie
         -pthread
-        -shared-libgcc
-        # -symbolic
-        # -Wl,–verbose
-        # -Wl,–print-memory-usage
+        -shared-libgcc 
         -ldl 
-        -Wl,-Map=linker-map.map
-        # -Wl,–gc-sections
+        -Wl,-Map=linker-map.map        
         -ffunction-sections
-        -fdata-sections
-        
+        -fdata-sections        
 )  
         
 #---------------------------------------------------------Common Compile options--------------------------------------------------------
@@ -150,21 +145,17 @@ add_compile_options(
     -fcheck-new
     -fstrict-enums
     -fstrong-eval-order    
-    -fdiagnostics-show-location=every-line
-    # -fsyntax-only
+    -fdiagnostics-show-location=every-line    
     -fstack-protector
-#     -fsanitize=undefined  N.B: undefined reference to `__ubsan_handle_type_mismatch_v1'
     -fsanitize=shift
     -fsanitize=shift-exponent
     -fsanitize=shift-base
     -fsanitize=integer-divide-by-zero
     -fsanitize=unreachable
     -fsanitize=vla-bound
-#     -fsanitize=null  N.B: undefined reference to `__ubsan_handle_type_mismatch_v1'
     -fsanitize=return
     -fsanitize=signed-integer-overflow
     -fsanitize=bounds-strict
-#     -fsanitize=alignment  N.B: undefined reference to `__ubsan_handle_type_mismatch_v1'
     -fsanitize=object-size
     -fsanitize=float-divide-by-zero
     -fsanitize=float-cast-overflow
@@ -172,23 +163,18 @@ add_compile_options(
     -fsanitize=returns-nonnull-attribute
     -fsanitize=bool
     -fsanitize=enum
-#     -fsanitize=vptr  N.B: undefined reference to `__ubsan_handle_dynamic_type_cache_miss'
-    
     -fsanitize=builtin
     -fsanitize-address-use-after-scope
-#     -fsanitize-coverage=trace-pc
     -fsanitize-coverage=trace-cmp
     -fcf-protection=full
     -fharden-compares
     -fharden-conditional-branches
     -fstack-protector-strong
     -fstack-check
-#     -fstack-clash-protection
-#     -fvtable-verify=std   N.B: undefined reference to `__VLTRegisterPair'
-#     -finstrument-functions-once  N.B: undefined reference to `__sanitizer_cov_trace_const_cmp1'
     -fexceptions
     -fdelete-dead-exceptions
     -ftrampolines
+    
     #Precompiled Headers
 #     -x 
 #     -fpreprocessed
