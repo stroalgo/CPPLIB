@@ -1,3 +1,6 @@
+# -----------------------------------------------------------------------------
+# Function to add sstatic hared library
+# -----------------------------------------------------------------------------
 function(add_static_library NAME VERSION)
     # Add library target
     add_library(${NAME} STATIC)
@@ -23,19 +26,21 @@ function(add_static_library NAME VERSION)
         add_code_coverage(${NAME})
     endif()
 
-    # # Install
-    # install(
-    #     TARGETS ${NAME}
-    #     ARCHIVE
-    #     LIBRARY
-    #     RUNTIME
-    # )
+    # Install
+    install(
+        TARGETS ${NAME}
+        ARCHIVE
+        LIBRARY
+        RUNTIME
+    )
 
     # # Install header
     # install(FILES inc/${PROJECT_NAME}.hpp TYPE INCLUDE)
 endfunction()
 
-
+# -----------------------------------------------------------------------------
+# Function to add shared library
+# -----------------------------------------------------------------------------
 function(add_shared_library NAME VERSION)
     # Add library target
     add_library(${NAME} SHARED)
@@ -61,16 +66,50 @@ function(add_shared_library NAME VERSION)
         # add_code_coverage(${NAME})
     endif()
 
-    # # Install
-    # install(
-    #     TARGETS ${NAME}
-    #     ARCHIVE
-    #     LIBRARY
-    #     RUNTIME
-    # )
+    # Install
+    install(
+        TARGETS ${NAME}
+        ARCHIVE
+        LIBRARY
+        RUNTIME
+    )
 
     # # Install header
     # install(FILES inc/${PROJECT_NAME}.hpp TYPE INCLUDE)
+endfunction()
+
+# -----------------------------------------------------------------------------
+# Function to make Doxygen Documentation
+# -----------------------------------------------------------------------------
+function(make_doxygen_doc NAME VERSION DESCRIPTION)
+    # Import Doxygen if it is not already the case
+    find_package(Doxygen REQUIRED dot)
+    if(DOXYGEN_FOUND)   
+        message("Make documentation for ${NAME}")
+
+        # set input and output files
+        set(DOXYGEN_PROJECT_NAME ${NAME})
+        set(DOXYGEN_PROJECT_VERSION ${VERSION})
+        set(DOXYGEN_PROJECT_DESCRIPTION ${DESCRIPTION})
+        set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/Docs/Doxyfile)
+        set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)        
+
+        configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+
+        add_custom_target( ${NAME}_doc ALL
+            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+            WORKING_DIRECTORY   ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generating API documentation for ${NAME}"
+            VERBATIM 
+        )
+
+        # Documentation installation
+        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+                DESTINATION ${CMAKE_INSTALL_DOCDIR}/${NAME}
+        )
+    else()
+        message("Doxygen need to be installed to generate the doxygen documentation")
+    endif()   
 endfunction()
 
 

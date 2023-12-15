@@ -6,15 +6,8 @@
 project(
     Network
     VERSION 1.0.0
+    DESCRIPTION "Network project description"
     LANGUAGES CXX)
-
-# -----------------------------------------------------------------------------
-# Documentation
-# -----------------------------------------------------------------------------
-if(BUILD_DOC)
-    add_doxygen_doc(${PROJECT_NAME})
-endif()
-
 
 # -----------------------------------------------------------------------------
 # Build Library
@@ -33,10 +26,13 @@ target_include_directories(
         headers/       
 )
 
-# Link libraries
-# target_link_libraries(
-#     ${PROJECT_NAME}
-#     PUBLIC)
+# -----------------------------------------------------------------------------
+# Documentation
+# -----------------------------------------------------------------------------
+if(BUILD_WITH_DOC)
+    make_doxygen_doc(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_DESCRIPTION})
+endif()
+
 
 # -----------------------------------------------------------------------------
 # Tests

@@ -20,14 +20,17 @@ endif()
 #---------------------------------------------------------Project Settings--------------------------------------------------------
 project(CppLib 
         VERSION 1.0.0
-        LANGUAGES CXX)        
+        LANGUAGES CXX)    
+        
+        
+#---------------------------------------------------------Additional CMake modules--------------------------------------------------------
+include(GNUInstallDirs)
 
 
 #---------------------------------------------------------Options--------------------------------------------------------
 option(BUILD_WITH_TEST          "Build units tests"      ON)
-option(BUILD_WITH_DOC           "Generate Documentation" OFF)
+option(BUILD_WITH_DOC           "Generate Documentation" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable Code Coverage"   OFF)
-set(GCC_COLORS "error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01")
 
 #---------------------------------------------------------Language Settings--------------------------------------------------------
 #C Settings
@@ -39,6 +42,12 @@ set(CMAKE_C_EXTENSIONS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
+
+#Project Install
+IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/_DELIVERY_/${CMAKE_BUILD_TYPE}" CACHE PATH "install prefix" FORCE)
+ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
 
 
 #---------------------------------------------------------Unit Test Settings--------------------------------------------------------
