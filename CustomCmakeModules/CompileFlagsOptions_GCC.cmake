@@ -170,7 +170,6 @@ add_compile_options(
     -fharden-compares
     -fharden-conditional-branches
     -fstack-protector-strong
-    -fstack-check
     -fexceptions
     -fdelete-dead-exceptions
     -ftrampolines

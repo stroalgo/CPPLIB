@@ -1,20 +1,23 @@
 pipeline {
-  agent {dockerfile true}
+  agent { dockerfile true }
   stages {
+    stage('Configure') {
+      steps {
+        sh 'echo "Configuring..."'        
+        sh 'mkdir build && cd build && cmake ..'       
+      }
+    }
+
     stage('Build') {
       steps {
-        sh 'echo "Building..."'
-        // sh 'chmod +x build.sh'
-        // sh './build.sh'
-        // archiveArtifacts(artifacts: 'scripts/teste.out', fingerprint: true)
+        sh 'echo "Building..."'        
+        sh 'cd build && make'        
       }
     }
 
     stage('Test') {
       steps {
-        sh 'echo "Running..."'
-        // sh 'chmod +x run.sh'
-        // sh './run.sh'
+        sh 'echo "Running Unit Tests..."'        
       }
     }
   }
