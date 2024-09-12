@@ -20,16 +20,15 @@ pipeline {
         sh 'echo "Running Unit Tests..."'        
       }
     }
-
-    stage('SonarQube') {
-      agent any
-      steps {
-        sh 'echo "Scanning Code..."'        
-        sh 'sonar-scanner \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.token=sqa_c41bc99e331cf80ec434743663944f1be7ec140f'
-      }
-    }
+    
+     stage('SonarQube Analysis') {
+            steps {
+                script {                    
+                    withSonarQubeEnv('sonarqube_cpplib') {
+                        sh '/opt/sonar-scanner/bin/sonar-scanner  -Dsonar.sources=. -Dsonar.projectKey=cpplib'             
+                    }
+                }
+            }
+        }
   }
 }

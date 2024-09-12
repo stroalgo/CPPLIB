@@ -6,7 +6,10 @@ ENV HOME /root
 SHELL ["/bin/bash", "-c"]
 
 # Install tools
+
+
 RUN apt-get update && apt-get -y --no-install-recommends install \
+  ca-certificates \
   build-essential \
   clang \
   cmake \
@@ -14,5 +17,11 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
   wget \ 
   graphviz \
   doxygen \
+  unzip \
   valgrind && \
-  apt-get clean
+  apt-get clean 
+
+# Install sonar scanner
+RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.1.0.4477-linux-x64.zip 
+RUN unzip sonar-scanner-cli-6.1.0.4477-linux-x64.zip 
+RUN mv sonar-scanner-6.1.0.4477-linux-x64 /opt/sonar-scanner
