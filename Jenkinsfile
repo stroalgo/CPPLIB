@@ -20,12 +20,15 @@ pipeline {
         sh 'echo "Running Unit Tests..."'        
       }
     }
-    
+
      stage('SonarQube Analysis') {
             steps {
                 script {                    
                     withSonarQubeEnv('sonarqube_cpplib') {
-                        sh '/opt/sonar-scanner/bin/sonar-scanner  -Dsonar.sources=. -Dsonar.projectKey=cpplib'             
+                        sh '/opt/sonar-scanner/bin/sonar-scanner \
+                            -Dsonar.sources=. \ 
+                            -Dsonar.projectKey=cpplib \
+                            -Dsonar.cfamily.compile-commands=build/compile_commands.json'             
                     }
                 }
             }
