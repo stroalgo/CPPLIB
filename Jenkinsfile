@@ -34,7 +34,14 @@ pipeline {
                     --std=c++17 \
                     --platform=win64 \
                     --xml \
-                    --xml-version=2  src 2> cppcheck.xml'      
+                    --xml-version=2  src 2> cppcheck.xml'  
+
+                sh 'echo "Static C/C++ code analysis ===> RATS"'  
+                sh 'rats \
+                    -w 3 \
+                    --xml \
+                    -l "c" \
+                    src > rats.xml'
 
           script {                    
               withSonarQubeEnv('sonarqube_cpplib') {
@@ -44,6 +51,7 @@ pipeline {
                     -Dsonar.cfamily.compile-commands=build/compile_commands.json \
                     -Dsonar.cxx.includeDirectories=/usr/include/c++/14,/usr/include,/usr/include/x86_64-linux-gnu/c++/14,/usr/include/x86_64-linux-gnu,/usr/lib/gcc/x86_64-linux-gnu/14/include \
                     -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
+                    -Dsonar.cxx.rats.reportPaths=rats.xml \
                     -Dsonar.verbose=true ' 
               }
           }
