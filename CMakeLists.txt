@@ -26,7 +26,8 @@ project(CppLib
 #---------------------------------------------------------Additional CMake modules--------------------------------------------------------
 include(GNUInstallDirs)
 
-
+#to ON for  creating compile_commands.json
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #---------------------------------------------------------Options--------------------------------------------------------
 option(BUILD_WITH_TEST          "Build units tests"      ON)
 option(BUILD_WITH_DOC           "Generate Documentation" ON)
@@ -57,7 +58,7 @@ if(BUILD_WITH_TEST)
 endif()
 
 #--------------------------------------------------------- Add SubDir--------------------------------------------------------
-add_subdirectory(Utilities)
+add_subdirectory(src)
 
 
 
