@@ -50,6 +50,12 @@ pipeline {
                     -analyze-headers \
                     -o ../clang_reports make'
 
+                sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'  
+                catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', message: 'Skip in case of cmd failure')
+                {
+                  sh 'cd build && run-clang-tidy > ../clang-tidy.txt'
+                }
+
           script {                    
               withSonarQubeEnv('sonarqube_cpplib') {
                 sh '/opt/sonar-scanner/bin/sonar-scanner \
@@ -60,6 +66,7 @@ pipeline {
                     -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
                     -Dsonar.cxx.rats.reportPaths=rats.xml \
                     -Dsonar.cxx.clangsa.reportPaths=clang_reports/*/*.plist \
+                    -Dsonar.cxx.clangtidy.reportPaths=clang-tidy.txt \
                     -Dsonar.verbose=true ' 
               }
           }
