@@ -6,12 +6,10 @@ ENV HOME /root
 SHELL ["/bin/bash", "-c"]
 
 # Install tools
-
-
 RUN apt-get update && apt-get -y --no-install-recommends install \
   ca-certificates \
   build-essential \
-  clang \
+  clang \ 
   cmake \
   gdb \
   wget \ 
@@ -19,8 +17,11 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
   doxygen \
   unzip \
   cppcheck \
+  clang-tools \
   libexpat1 \
-  libexpat1-dev \
+  libexpat1-dev \  
+  python3 \
+  clang-tidy \
   valgrind && \
   apt-get clean 
 
@@ -37,3 +38,6 @@ RUN chmod u+x configure
 RUN ./configure
 RUN make
 RUN make install
+
+
+

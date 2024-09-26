@@ -43,6 +43,13 @@ pipeline {
                     -l "c" \
                     src > rats.xml'
 
+
+                sh 'echo "Static C/C++ code analysis ===> CLANG"'  
+                sh 'cd build && scan-build \
+                    -plist \
+                    -analyze-headers \
+                    -o ../clang_reports make'
+
           script {                    
               withSonarQubeEnv('sonarqube_cpplib') {
                 sh '/opt/sonar-scanner/bin/sonar-scanner \
@@ -52,6 +59,7 @@ pipeline {
                     -Dsonar.cxx.includeDirectories=/usr/include/c++/14,/usr/include,/usr/include/x86_64-linux-gnu/c++/14,/usr/include/x86_64-linux-gnu,/usr/lib/gcc/x86_64-linux-gnu/14/include \
                     -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
                     -Dsonar.cxx.rats.reportPaths=rats.xml \
+                    -Dsonar.cxx.clangsa.reportPaths=clang_reports/*/*.plist \
                     -Dsonar.verbose=true ' 
               }
           }
