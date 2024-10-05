@@ -1,6 +1,6 @@
 #---------------------------------------------------------Choose Compiler : Default is GCC--------------------------------------------------------
 option(BUILD_WITH_CLANG          "Build with Clang Compiler"     OFF)
-option(BUILD_WITH_MSCV           "Build with MSVC Compiler"      OFF)
+option(BUILD_WITH_MSCV           "Build with MSVC Compiler"      ON)
 
 if(BUILD_WITH_CLANG)
     set(ROOT_TOOLCHAIN_PATH "C:/Users/Siebenou/Documents/Projects/C++/Tools/winlibs-x86_64-mcf-seh-gcc-13.2.0-llvm-16.0.6-mingw-w64ucrt-11.0.1-r2/mingw64/bin")

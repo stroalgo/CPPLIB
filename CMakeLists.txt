@@ -8,13 +8,13 @@ include(CommonFunctions)
 
 #---------------------------------------------------------ToolChain Settings--------------------------------------------------------
 if (CMAKE_HOST_SYSTEM_NAME  STREQUAL "Linux")
-    message("Target platform : LINUX")
+    message("🟢 Target platform : LINUX")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ToolChains/ToolChain_Linux.cmake")
 elseif(CMAKE_HOST_SYSTEM_NAME  STREQUAL "Windows")
-    message("Target platform : WINDOWS")
+    message("🟢 Target platform : WINDOWS")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ToolChains/ToolChain_Win.cmake")
 else()
-    message(FATAL_ERROR "This platform is not yet supported : ${CMAKE_HOST_SYSTEM_NAME}")
+    message(FATAL_ERROR "🔴 This platform is not yet supported : ${CMAKE_HOST_SYSTEM_NAME}")
 endif()
 
 #---------------------------------------------------------Project Settings--------------------------------------------------------

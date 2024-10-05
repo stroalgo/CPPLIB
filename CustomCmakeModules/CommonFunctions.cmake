@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Function to add sstatic hared library
+# Function to add static library
 # -----------------------------------------------------------------------------
 function(add_static_library NAME VERSION)
     # Add library target
@@ -85,7 +85,7 @@ function(make_doxygen_doc NAME VERSION DESCRIPTION)
     # Import Doxygen if it is not already the case
     find_package(Doxygen REQUIRED dot)
     if(DOXYGEN_FOUND)   
-        message("Make documentation for ${NAME}")
+        message("🟢 Make documentation for ${NAME}")
 
         # set input and output files
         set(DOXYGEN_PROJECT_NAME ${NAME})
@@ -108,9 +108,51 @@ function(make_doxygen_doc NAME VERSION DESCRIPTION)
                 DESTINATION ${CMAKE_INSTALL_DOCDIR}/${NAME}
         )
     else()
-        message("Doxygen need to be installed to generate the doxygen documentation")
+        message("🔴 Doxygen need to be installed to generate the doxygen documentation")
     endif()   
 endfunction()
+
+
+# -----------------------------------------------------------------------------
+# Function to create unitTest executable
+# -----------------------------------------------------------------------------
+###TODO: FetchContent will be replace by conan manager
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.15.2
+)
+FetchContent_MakeAvailable(googletest)
+
+function(add_unit_test NAME)
+
+    # Add test executable target
+    add_executable(${NAME}_test unitTest/main.cpp unitTest/test.cpp)
+
+    # Find Google Test
+    find_package(GTest REQUIRED)
+
+    # Add test framework link libraries
+    target_link_libraries(
+        ${NAME}_test PRIVATE ${NAME} GTest::gtest GTest::gtest_main
+    )  
+
+    # Automatically add tests with CTest
+    gtest_discover_tests(
+        ${NAME}_test
+        XML_OUTPUT_DIR
+        ./test_result/
+        DISCOVERY_MODE
+        PRE_TEST
+    )
+
+    # Test target dependencies
+    add_dependencies(${NAME}_test ${NAME})
+endfunction()
+
+
+
 
 
 # additional target to perform clang-format run, requires clang-format

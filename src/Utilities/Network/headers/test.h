@@ -1,8 +1,8 @@
 /**
- * @file        web_picture_requests.hpp
- * @author      ALLOGHO (stronguy.allogho@external.idemia.com)
- * @brief       Class for picture request
- * @details     This header provides the declaration of picture requests
+ * @file        test.h
+ * @author      ALLOGHO 
+ * @brief       test functions
+ * @details     This header provides the declaration of fuctions
  * @version     1.0
  * @date        2023-03-31
  *
@@ -10,7 +10,7 @@
  *
  */
 
-#include <stdio>
+#include <stdio.h>
 
 /**
  * @brief web namespace
@@ -18,31 +18,17 @@
  */
 namespace Utilities {
 /**
- * @brief Test documentation
+ * @brief Multiply fonction  
  *
  */
+int multiply(int a, int b);
 
-int test(void);
 
 /**
- * @brief Osiris web Picture requests
- *
+  @brief Multiply fonction
  */
-class WebPictureRequests {
-public:
-  /**
-   * @brief Construct a new Web Picture Requests object
-   *
-   */
-  WebPictureRequests();
+float multiply(float a, float b);
 
-  /**
-   * @brief Implementation of the base class Method for converting to json
-   * Format
-   *
-   * @return const boost::property_tree::ptree
-   */
-  const int ToJson();
-};
+
 
 } // namespace Utilities

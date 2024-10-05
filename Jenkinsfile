@@ -17,7 +17,8 @@ pipeline {
 
     stage('Test') {
       steps {
-        sh 'echo "Running Unit Tests..."'        
+        sh 'echo "Running Unit Tests..."'   
+        sh 'ctest -V --test-dir build --output-junit ../unitTestReports.xml'     
       }
     }
 
@@ -60,6 +61,7 @@ pipeline {
               withSonarQubeEnv('sonarqube_cpplib') {
                 sh '/opt/sonar-scanner/bin/sonar-scanner \
                     -Dsonar.sources=src \
+                    -Dsonar.tests=src \
                     -Dsonar.projectKey=cpplib \
                     -Dsonar.cfamily.compile-commands=build/compile_commands.json \
                     -Dsonar.cxx.includeDirectories=/usr/include/c++/14,/usr/include,/usr/include/x86_64-linux-gnu/c++/14,/usr/include/x86_64-linux-gnu,/usr/lib/gcc/x86_64-linux-gnu/14/include \
@@ -67,6 +69,7 @@ pipeline {
                     -Dsonar.cxx.rats.reportPaths=rats.xml \
                     -Dsonar.cxx.clangsa.reportPaths=clang_reports/*/*.plist \
                     -Dsonar.cxx.clangtidy.reportPaths=clang-tidy.txt \
+                    -Dsonar.cxx.xunit.reportPaths=unitTestReports.xml \
                     -Dsonar.verbose=true ' 
               }
           }

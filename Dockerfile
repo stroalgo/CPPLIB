@@ -12,6 +12,8 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
   clang \ 
   cmake \
   gdb \
+  git\
+  libgtest-dev \
   wget \ 
   graphviz \
   doxygen \

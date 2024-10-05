@@ -21,7 +21,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
                 -Ofast3
                 -ggdb3
         )
-        message("CLANG RELEASE WITH DEBUG INFO Compile options  added")
+        message("🟢 CLANG RELEASE WITH DEBUG INFO Compile options  added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
         add_compile_options(
@@ -37,7 +37,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
                 -fstandalone-debug
                 -fdiagnostics-format=clang                
         )
-        message("CLANG DEBUG Compile options added")
+        message("🟢 CLANG DEBUG Compile options added")
 endif()       
         
 #---------------------------------------------------------Compile Link options--------------------------------------------------------
