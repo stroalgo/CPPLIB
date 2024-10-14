@@ -127,6 +127,8 @@ FetchContent_MakeAvailable(googletest)
 
 function(add_unit_test NAME)
 
+    message("🟢 Add Unitest for ${NAME}")
+
     # Add test executable target
     add_executable(${NAME}_test unitTest/main.cpp unitTest/test.cpp)
 
@@ -137,6 +139,10 @@ function(add_unit_test NAME)
     target_link_libraries(
         ${NAME}_test PRIVATE ${NAME} GTest::gtest GTest::gtest_main
     )  
+
+    # Add code coverage link libraries
+    target_compile_options( ${NAME}_test PRIVATE -coverage)
+    target_link_options( ${NAME}_test PRIVATE -coverage)
 
     # Automatically add tests with CTest
     gtest_discover_tests(

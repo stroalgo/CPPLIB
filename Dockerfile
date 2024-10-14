@@ -23,6 +23,7 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
   libexpat1 \
   libexpat1-dev \  
   python3 \
+  python3-pip \    
   clang-tidy \
   valgrind && \
   apt-get clean 
@@ -40,6 +41,11 @@ RUN chmod u+x configure
 RUN ./configure
 RUN make
 RUN make install
+
+# Install python tools
+RUN rm /usr/lib/python*/EXTERNALLY-MANAGED && \  
+  pip3 install gcovr 
+
 
 
 
