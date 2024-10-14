@@ -79,5 +79,17 @@ pipeline {
           }
       }
         }
+  } 
+  
+  
+   post {
+        always {
+            junit (testResults:'unitTestReports.xml', allowEmptyResults : true)
+        }
   }
+  
+  
+  
+  
+  
 }
