@@ -116,14 +116,6 @@ endfunction()
 # -----------------------------------------------------------------------------
 # Function to create unitTest executable
 # -----------------------------------------------------------------------------
-###TODO: FetchContent will be replace by conan manager
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        v1.15.2
-)
-FetchContent_MakeAvailable(googletest)
 
 function(add_unit_test NAME)
 
@@ -141,8 +133,8 @@ function(add_unit_test NAME)
     )  
 
     # Add code coverage link libraries
-    target_compile_options( ${NAME}_test PRIVATE -coverage)
-    target_link_options( ${NAME}_test PRIVATE -coverage)
+    target_compile_options( ${NAME}_test PRIVATE -coverage  -fprofile-arcs -ftest-coverage)
+    target_link_options( ${NAME}_test PRIVATE -coverage -lgcov)
 
     # Automatically add tests with CTest
     gtest_discover_tests(
