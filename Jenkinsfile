@@ -1,17 +1,27 @@
 pipeline {
   agent { dockerfile true }
   stages {
+
+    stage('Load Dependencies') {
+      steps {
+        sh 'echo "create conan profile..."'
+        sh 'conan profile detect'
+        sh 'echo "Loading..."'        
+        sh 'conan install . -sbuild_type=Debug --build=missing'
+      }
+    }
+
     stage('Configure') {
       steps {
         sh 'echo "Configuring..."'        
-        sh 'cmake -B build'       
+        sh 'cmake --preset conan-debug'       
       }
     }
 
     stage('Build') {
       steps {
         sh 'echo "Building..."'        
-        sh 'make -C build'        
+        sh 'cmake --build --preset conan-debug'        
       }
     }
 

@@ -12,8 +12,7 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
   clang \ 
   cmake \
   gdb \
-  git\
-  libgtest-dev \
+  git\  
   wget \ 
   graphviz \
   doxygen \
@@ -44,7 +43,7 @@ RUN make install
 
 # Install python tools
 RUN rm /usr/lib/python*/EXTERNALLY-MANAGED && \  
-  pip3 install gcovr 
+  pip3 install gcovr conan
 
 
 

@@ -33,5 +33,22 @@
 			"group": "build",
 			"problemMatcher": []
 		},
+		{
+			"type": "shell",
+			"label": "conan install RELWITHDEBINFO",
+			"command": "conan",
+			"args": [
+				"install",
+				".",
+				"--build=missing",
+				"-s &:build_type=RelWithDebInfo",
+				"-sbuild_type=Release"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"problemMatcher": []
+		},
 	]
 }
