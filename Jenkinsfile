@@ -1,38 +1,57 @@
 pipeline {
   agent { dockerfile true }
-  stages {
+
+  parameters{
+      choice(name:'BuildType', choices:'Debug\nRelease\nRelWithDebInfo',description:'Which type of build to consider?'
+          )
+  }
+
+  environment {
+              buildTypeLower = "${BuildType.toLowerCase()}"
+  }
+    
+  stages {   
 
     stage('Load Dependencies') {
       steps {
         sh 'echo "create conan profile..."'
         sh 'conan profile detect'
-        sh 'echo "Loading..."'        
-        sh 'conan install . -sbuild_type=Debug --build=missing'
+        sh 'echo "Loading..."'   
+        script {
+                    if (BuildType == 'RelWithDebInfo') {
+                      sh 'conan install .  --build=missing  -s "&:build_type=$BuildType" -sbuild_type=Release'
+                    }
+                    else {
+                      sh 'conan install . -sbuild_type=$BuildType --build=missing'
+                    }
+                }     
+       
       }
     }
 
-    stage('Configure') {
+    stage('Configure') {     
+      
       steps {
         sh 'echo "Configuring..."'        
-        sh 'cmake --preset conan-debug'       
+        sh 'cmake --preset conan-$buildTypeLower'       
       }
     }
 
     stage('Build') {
       steps {
         sh 'echo "Building..."'        
-        sh 'cmake --build --preset conan-debug'        
+        sh 'cmake --build --preset conan-$buildTypeLower'        
       }
     }
 
     stage('Test') {
       steps {
         sh 'echo "Running Unit Tests..."'   
-        sh 'ctest -V  --test-dir build --output-junit ../unitTestReports.xml'     
+        sh 'ctest -V  --test-dir build/$BuildType --output-junit  unitTestReports.xml'     
      
         sh 'echo "Running Coverage Tests..."'
-        sh 'ctest -V -T Coverage --test-dir build'
-        sh 'gcovr -r build --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
+        sh 'ctest -V -T Coverage --test-dir build/$BuildType'
+        sh 'gcovr -r build/$BuildType --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
       }
     }
 
@@ -60,15 +79,15 @@ pipeline {
 
 
                 sh 'echo "Static C/C++ code analysis ===> CLANG"'  
-                sh 'cd build && scan-build \
+                sh 'cd build/$BuildType && scan-build \
                     -plist \
                     -analyze-headers \
-                    -o ../clang_reports make'
+                    -o clang_reports make'
 
                 sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'  
                 catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', message: 'Skip in case of cmd failure')
                 {
-                  sh 'cd build && run-clang-tidy > ../clang-tidy.txt'
+                  sh 'cd build/$BuildType && run-clang-tidy > clang-tidy.txt'
                 }
 
           script {                    
@@ -76,13 +95,13 @@ pipeline {
                 sh '/opt/sonar-scanner/bin/sonar-scanner \
                     -Dsonar.sources=src \
                     -Dsonar.projectKey=cpplib \
-                    -Dsonar.cfamily.compile-commands=build/compile_commands.json \
+                    -Dsonar.cfamily.compile-commands=build/$BuildType/compile_commands.json \
                     -Dsonar.cxx.includeDirectories=/usr/include/c++/14,/usr/include,/usr/include/x86_64-linux-gnu/c++/14,/usr/include/x86_64-linux-gnu,/usr/lib/gcc/x86_64-linux-gnu/14/include \
                     -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
                     -Dsonar.cxx.rats.reportPaths=rats.xml \
-                    -Dsonar.cxx.clangsa.reportPaths=clang_reports/*/*.plist \
-                    -Dsonar.cxx.clangtidy.reportPaths=clang-tidy.txt \
-                    -Dsonar.cxx.xunit.reportPaths=unitTestReports.xml \
+                    -Dsonar.cxx.clangsa.reportPaths=build/$BuildType/clang_reports/*/*.plist \
+                    -Dsonar.cxx.clangtidy.reportPaths=build/$BuildType/clang-tidy.txt \
+                    -Dsonar.cxx.xunit.reportPaths=build/$BuildType/unitTestReports.xml \
                     -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml  \
                     -Dsonar.verbose=true ' 
               }
@@ -94,7 +113,7 @@ pipeline {
   
    post {
         always {
-            junit (testResults:'unitTestReports.xml', allowEmptyResults : true)
+            junit (testResults:'build/$BuildType/unitTestReports.xml', allowEmptyResults : true)
         }
   }
   
