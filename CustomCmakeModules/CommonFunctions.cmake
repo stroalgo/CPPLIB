@@ -34,8 +34,8 @@ function(add_static_library NAME VERSION)
         RUNTIME
     )
 
-    # # Install header
-    # install(FILES inc/${PROJECT_NAME}.hpp TYPE INCLUDE)
+    # Install headers
+    install(DIRECTORY headers/ DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN ".*hpp")
 endfunction()
 
 # -----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ function(add_shared_library NAME VERSION)
         # add_code_coverage(${NAME})
     endif()
 
-    # Install
+    # Install binaries
     install(
         TARGETS ${NAME}
         ARCHIVE
@@ -74,8 +74,8 @@ function(add_shared_library NAME VERSION)
         RUNTIME
     )
 
-    # # Install header
-    # install(FILES inc/${PROJECT_NAME}.hpp TYPE INCLUDE)
+    # Install headers
+    install(DIRECTORY headers/ DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN ".*hpp")
 endfunction()
 
 # -----------------------------------------------------------------------------

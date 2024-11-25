@@ -1,4 +1,5 @@
 build/
-.vscode
+.vscode/launch.json
 .cache
 _DELIVERY_/
+_PACKAGE_/

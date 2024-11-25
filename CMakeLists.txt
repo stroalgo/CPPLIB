@@ -40,7 +40,7 @@ option(BUILD_WITH_TEST          "Build units tests"      ON)
 option(BUILD_WITH_DOC           "Generate Documentation" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable Code Coverage"   OFF)
 
-#---------------------------------------------------------Language/Build/Package Settings--------------------------------------------------------
+#---------------------------------------------------------Language/Build--------------------------------------------------------
 #C Settings
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -63,11 +63,13 @@ if(BUILD_WITH_TEST)
     enable_testing()
 endif()
 
-
-
 #--------------------------------------------------------- Add SubDir--------------------------------------------------------
 add_subdirectory(src)
 
+
+#--------------------------------------------------------- Package--------------------------------------------------------
+include(Package)
+include(CPack)
 
 
 
