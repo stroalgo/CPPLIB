@@ -53,6 +53,11 @@ pipeline {
         sh 'ctest -V -T Coverage --test-dir build/$BuildType'
         sh 'gcovr -r build/$BuildType --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
       }
+      post {
+        success  {
+            junit (testResults:'build/$BuildType/unitTestReports.xml', allowEmptyResults : true)
+        }
+      }
     }
 
      stage('SonarQube') {
@@ -108,14 +113,23 @@ pipeline {
           }
       }
         }
+
+
+    stage('Package') {
+      steps {
+        sh 'echo "Packaging..."'        
+        sh 'cd  build/$BuildType && make package'        
+      }
+      post {
+        success  {
+            archiveArtifacts artifacts: '_PACKAGE_/CppLib-*.sh', onlyIfSuccessful: true
+        }
+  }
+    }
   } 
   
   
-   post {
-        always {
-            junit (testResults:'build/$BuildType/unitTestReports.xml', allowEmptyResults : true)
-        }
-  }
+   
   
   
   
