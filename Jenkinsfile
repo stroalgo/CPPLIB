@@ -13,7 +13,7 @@ pipeline {
   environment {
               buildTypeLower = "${BuildType.toLowerCase()}"
               NEXUS_VERSION = "nexus3"
-              NEXUS_PROTOCOL = "https"
+              NEXUS_PROTOCOL = "http"
               NEXUS_URL = "172.17.0.1:8081"
               NEXUS_REPOSITORY = "CppLib"
               NEXUS_CREDENTIAL_ID = "nexus_cpplib"
@@ -139,48 +139,43 @@ pipeline {
     stage("Publish Package to nexus") {
             steps {
                 script {
-                    sh 'echo "Publish package to Nexux..."'    
-                    // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
-                    pom = readMavenPom file: "pom.xml";
+                  if (BuildType == 'Release') {
+                    sh 'echo "Publish package to Nexus..."'                      
                     // Find built artifact under target folder
-                    filesByGlob = findFiles(glob: "_PACKAGE_/CppLib-*.sh");
-                    // Print some info from the artifact found
-                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+                    filesByGlob = findFiles(glob: "_PACKAGE_/*.sh");                    
                     // Extract the path from the File found
                     artifactPath = filesByGlob[0].path;
                     // Assign to a boolean response verifying If the artifact name exists
-                    artifactExists = fileExists artifactPath;
-
+                    artifactExists = fileExists artifactPath;                   
+                    //Extract current version
+                    versionExtracted = artifactPath.split('-')[1]                    
                     if(artifactExists) {
                         echo "*** File: ${artifactPath}";
-
                         nexusArtifactUploader(
                             nexusVersion: NEXUS_VERSION,
                             protocol: NEXUS_PROTOCOL,
                             nexusUrl: NEXUS_URL,
-                           // groupId: pom.groupId,
-                            //version: pom.version,
+                            groupId: "org.stroalgo",
+                            version: "${BuildType}-${versionExtracted}",
                             repository: NEXUS_REPOSITORY,
                             credentialsId: NEXUS_CREDENTIAL_ID,
-                            artifacts: [
-                                // Artifact generated such as .jar, .ear and .war files.
-                                [artifactId: pom.artifactId,
+                            artifacts: [                                
+                                [artifactId: NEXUS_REPOSITORY,
                                 classifier: '',
                                 file: artifactPath,
-                                ],
-
-                                // Lets upload the pom.xml file for additional information for Transitive dependencies
-                                // [artifactId: pom.artifactId,
-                                // classifier: '',
-                                // file: "pom.xml",
-                                // type: "pom"]
+                                type: 'sh'
+                                ]                                
                             ]
                         );
 
                     } else {
                         error "*** File: ${artifactPath}, could not be found";
                     }
+                  } else {
+                    sh 'echo "Not a release build type for Publishing to Nexus"'    
+                  }
                 }
+
             }
         }
   } 
