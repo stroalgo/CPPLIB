@@ -16,5 +16,9 @@ float multiply(float a, float b)
 }
 
 
+int*  leaker(void) {
+  return new int();
+}
+
 
 }

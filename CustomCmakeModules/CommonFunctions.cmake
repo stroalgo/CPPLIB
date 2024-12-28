@@ -85,7 +85,7 @@ function(make_doxygen_doc NAME VERSION DESCRIPTION)
     # Import Doxygen if it is not already the case
     find_package(Doxygen REQUIRED dot)
     if(DOXYGEN_FOUND)   
-        message("🟢 Make documentation for ${NAME}")
+        message("🟢 Add documentation for ${NAME}")
 
         # set input and output files
         set(DOXYGEN_PROJECT_NAME ${NAME})

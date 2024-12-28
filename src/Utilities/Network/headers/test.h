@@ -29,6 +29,11 @@ int multiply(int a, int b);
  */
 float multiply(float a, float b);
 
+/**
+  @brief leaker fonction
+ */
+int* leaker(void);
+
 
 
 } // namespace Utilities

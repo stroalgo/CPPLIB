@@ -10,20 +10,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CustomCmakeModules")
 include(CommonFunctions)
 
 
-
-
-#---------------------------------------------------------ToolChain Settings--------------------------------------------------------
-##TODO : Manage flags with conan
-# if (CMAKE_HOST_SYSTEM_NAME  STREQUAL "Linux")
-#     message("🟢 Target platform : LINUX")
-#     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ToolChains/ToolChain_Linux.cmake")
-# elseif(CMAKE_HOST_SYSTEM_NAME  STREQUAL "Windows")
-#     message("🟢 Target platform : WINDOWS")
-#     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ToolChains/ToolChain_Win.cmake")
-# else()
-#     message(FATAL_ERROR "🔴 This platform is not yet supported : ${CMAKE_HOST_SYSTEM_NAME}")
-# endif()
-
 #---------------------------------------------------------Project Settings--------------------------------------------------------
 project(CppLib 
         VERSION 1.0.0
@@ -36,9 +22,10 @@ include(GNUInstallDirs)
 #to ON for  creating compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #---------------------------------------------------------Options--------------------------------------------------------
-option(BUILD_WITH_TEST          "Build units tests"      ON)
-option(BUILD_WITH_DOC           "Generate Documentation" ON)
-option(BUILD_WITH_CODE_COVERAGE "Enable Code Coverage"   OFF)
+option(BUILD_WITH_TEST          "Build units tests"              ON)
+option(BUILD_WITH_DOC           "Generate Documentation"         ON)
+option(BUILD_WITH_CODE_COVERAGE "Enable Code Coverage"           OFF)
+option(BUILD_WITH_CLANG          "Build with Clang Compiler"     OFF)
 
 #---------------------------------------------------------Language/Build--------------------------------------------------------
 #C Settings
@@ -55,6 +42,23 @@ set(CMAKE_CXX_EXTENSIONS ON)
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/_DELIVERY_/${CMAKE_BUILD_TYPE}" CACHE PATH "install prefix" FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+
+#---------------------------------------------------------Flags Compilation--------------------------------------------------------
+if (CMAKE_HOST_SYSTEM_NAME  STREQUAL "Linux")
+    message("🟢 Target platform : LINUX")
+    if(BUILD_WITH_CLANG)
+      include(CompileFlagsOptions_CLANG)
+    else()
+      include(CompileFlagsOptions_GCC)
+    endif()
+elseif(CMAKE_HOST_SYSTEM_NAME  STREQUAL "Windows")
+    message("🟢 Target platform : WINDOWS")
+    include(CompileFlagsOptions_MSVC)
+else()
+    message(FATAL_ERROR "🔴 This platform is not yet supported : ${CMAKE_HOST_SYSTEM_NAME}")
+endif()
+
 
 #---------------------------------------------------------Unit Test Settings--------------------------------------------------------
 if(BUILD_WITH_TEST)

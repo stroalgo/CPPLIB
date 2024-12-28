@@ -19,6 +19,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                 -flimit-function-alignment
                 -ftracer
                 -fstdarg-opt
+                -fstack-clash-protection
+                
 
                 #### Available in GNU plateform
                 #-fprofile-use
@@ -86,7 +88,21 @@ add_link_options(
         -ldl 
         -Wl,-Map=linker-map.map        
         -ffunction-sections
-        -fdata-sections        
+        -fdata-sections                
+        -fsanitize=signed-integer-overflow
+        -fsanitize=leak
+        -fsanitize=null
+        -fsanitize=vptr    
+        -fsanitize=object-size
+        -fsanitize=float-divide-by-zero
+        -fsanitize=float-cast-overflow
+        -fsanitize=nonnull-attribute
+        -fsanitize=returns-nonnull-attribute
+        -fsanitize=bool
+        -fsanitize=enum
+        -fsanitize=builtin
+        -fsanitize-address-use-after-scope   
+        -fsanitize-coverage=trace-cmp     
 )  
         
 #---------------------------------------------------------Common Compile options--------------------------------------------------------
@@ -151,11 +167,13 @@ add_compile_options(
     -fsanitize=shift-exponent
     -fsanitize=shift-base
     -fsanitize=integer-divide-by-zero
-    -fsanitize=unreachable
+    -fsanitize=bounds-strict
     -fsanitize=vla-bound
     -fsanitize=return
     -fsanitize=signed-integer-overflow
-    -fsanitize=bounds-strict
+    -fsanitize=leak
+    -fsanitize=null
+    -fsanitize=vptr    
     -fsanitize=object-size
     -fsanitize=float-divide-by-zero
     -fsanitize=float-cast-overflow
@@ -166,10 +184,11 @@ add_compile_options(
     -fsanitize=builtin
     -fsanitize-address-use-after-scope
     -fsanitize-coverage=trace-cmp
+    -fsanitize=unreachable    
     -fcf-protection=full
     -fharden-compares
     -fharden-conditional-branches
-    -fstack-protector-strong
+    -fstack-protector-strong   
     -fexceptions
     -fdelete-dead-exceptions
     -ftrampolines
@@ -179,5 +198,4 @@ add_compile_options(
 #     -fpreprocessed
 #     -fpch-preprocess
 #     -H
-
 )
