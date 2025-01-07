@@ -20,9 +20,16 @@ pipeline {
   }
     
   stages {   
+    
 
-    stage('Load Dependencies') {
+    stage('Load Dependencies') {  
       steps {
+        script {
+                    currentBuild.displayName = "[#${BUILD_NUMBER}]"
+                    currentBuild.description = "Build Type: ${params.BuildType}\n"  +
+                                               "Branch Name: ${env.BRANCH_NAME}\n" +                                               
+                                               "Executed on: ${NODE_NAME}\n"
+                }
         sh 'echo "create conan profile..."'
         sh 'conan profile detect'
         sh 'echo "Loading..."'   
@@ -47,10 +54,15 @@ pipeline {
     }
 
     stage('Build') {
+      post {
+        always { 
+            echo 'Build Type: $BuildType'
+        }
+      }
       steps {
         sh 'echo "Building..."'        
         sh 'cmake --build --preset conan-$buildTypeLower'        
-      }
+      }      
     }
 
     stage('Test') {
@@ -117,12 +129,14 @@ pipeline {
                     -Dsonar.cxx.clangtidy.reportPaths=build/$BuildType/clang-tidy.txt \
                     -Dsonar.cxx.xunit.reportPaths=build/$BuildType/unitTestReports.xml \
                     -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml  \
+                    -Dsonar.qualitygate.wait=true \
+                    -Dsonar.qualitygate.timeout=300 \
+                    -Dsonar.branchname=${env.BRANCH_NAME} \
                     -Dsonar.verbose=true ' 
               }
           }
       }
         }
-
 
     stage('Package') {
       steps {
