@@ -150,7 +150,7 @@ pipeline {
       }
     }
 
-    stage("Publish Package to nexus") {
+    stage("Publish to nexus") {
             steps {
                 script {
                   if (BuildType == 'Release') {
@@ -192,13 +192,19 @@ pipeline {
 
             }
         }
+    
+        
   } 
   
-  
-   
-  
-  
-  
-  
+    post {
+            always {
+                
+                emailext attachLog: true,
+                    body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}",
+                    recipientProviders: [developers(), requestor()],
+                    subject: "Jenkins Build ${currentBuild.currentResult}: Job ${env.JOB_NAME}"
+                
+            }
+        } 
   
 }
