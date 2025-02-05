@@ -10,6 +10,13 @@ project(
     LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------
+# Dependencies
+# -----------------------------------------------------------------------------
+find_package(Boost REQUIRED )
+find_package(OpenSSL REQUIRED )
+
+
+# -----------------------------------------------------------------------------
 # Build Library
 # -----------------------------------------------------------------------------
 add_shared_library(${PROJECT_NAME} ${PROJECT_VERSION})
@@ -17,15 +24,25 @@ add_shared_library(${PROJECT_NAME} ${PROJECT_VERSION})
 # Add library sources
 target_sources(
     ${PROJECT_NAME}
-    PRIVATE sources/test.cpp)
+    PRIVATE sources/server.cpp)
 
 # Include directories
 target_include_directories(
     ${PROJECT_NAME}
     PUBLIC
+        ${Boost_INCLUDE_DIR}
         headers/       
 )
 
+
+# Link with other libraries
+target_link_libraries(
+    ${PROJECT_NAME}
+    PUBLIC
+        Boost::system
+        Boost::filesystem
+        openssl::openssl
+)
 # -----------------------------------------------------------------------------
 # Documentation
 # -----------------------------------------------------------------------------

@@ -121,8 +121,14 @@ function(add_unit_test NAME)
 
     message("🟢 Add Unitest for ${NAME}")
 
+    #List all test files
+    file (GLOB_RECURSE  tests_SRC 
+           "${CMAKE_CURRENT_SOURCE_DIR}/unitTest/*.cpp" 
+           "${CMAKE_CURRENT_SOURCE_DIR}/unitTest/*.cxx"               
+    )
+    
     # Add test executable target
-    add_executable(${NAME}_test unitTest/main.cpp unitTest/test.cpp)
+    add_executable(${NAME}_test ${tests_SRC})
 
     # Find Google Test
     find_package(GTest REQUIRED)
