@@ -6,14 +6,8 @@
 project(
     Network
     VERSION 1.0.0
-    DESCRIPTION "Network project description"
+    DESCRIPTION "This library contains Network utilities"
     LANGUAGES CXX)
-
-# -----------------------------------------------------------------------------
-# Dependencies
-# -----------------------------------------------------------------------------
-find_package(Boost REQUIRED )
-find_package(OpenSSL REQUIRED )
 
 
 # -----------------------------------------------------------------------------
@@ -29,8 +23,7 @@ target_sources(
 # Include directories
 target_include_directories(
     ${PROJECT_NAME}
-    PUBLIC
-        ${Boost_INCLUDE_DIR}
+    PUBLIC        
         headers/       
 )
 

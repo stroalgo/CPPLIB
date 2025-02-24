@@ -4,8 +4,8 @@
  * @brief       HTTPS Server with CRUD operations
  * @details     Uses Boost.Beast and OpenSSL for HTTPS functionality
  * @version     1.0
- * @date        2023-03-31
- * @copyright   Copyright (c) 2023 stroalgo.corp
+ * @date        2025-02-13
+ * @copyright   Copyright (c) 2025 stroalgo.corp
  *
  */
 

@@ -59,6 +59,15 @@ else()
     message(FATAL_ERROR "🔴 This platform is not yet supported : ${CMAKE_HOST_SYSTEM_NAME}")
 endif()
 
+#---------------------------------------------------------Dependencies--------------------------------------------------------
+#Boost
+find_package(Boost REQUIRED )
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})    
+endif()
+
+#Openssl
+find_package(OpenSSL REQUIRED )
 
 #---------------------------------------------------------Unit Test Settings--------------------------------------------------------
 if(BUILD_WITH_TEST)

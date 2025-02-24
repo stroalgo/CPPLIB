@@ -6,15 +6,8 @@
 project(
     Common
     VERSION 1.0.0
-    DESCRIPTION "This library contains utilies that are commonly use"
+    DESCRIPTION "This library contains utilies that are commonly used"
     LANGUAGES CXX)
-
-# -----------------------------------------------------------------------------
-# Dependencies
-# -----------------------------------------------------------------------------
-find_package(Boost REQUIRED )
-find_package(OpenSSL REQUIRED )
-
 
 # -----------------------------------------------------------------------------
 # Build Library
