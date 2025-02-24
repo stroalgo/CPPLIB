@@ -46,5 +46,6 @@ endif()
 # Tests
 # -----------------------------------------------------------------------------
 if(BUILD_TESTING)    
-   
+    set(DEPENDENCIES Boost::date_time)
+    add_unit_test(${PROJECT_NAME} ${DEPENDENCIES})    
 endif()
