@@ -69,6 +69,13 @@ endif()
 #Openssl
 find_package(OpenSSL REQUIRED )
 
+#Spdlog
+find_package(spdlog REQUIRED)
+if(Spdlog_FOUND)
+  #spdlog min level log
+  add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+endif()
+
 #---------------------------------------------------------Unit Test Settings--------------------------------------------------------
 if(BUILD_WITH_TEST)
     include(CTest)
