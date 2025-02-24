@@ -18,9 +18,6 @@ function(add_static_library NAME VERSION)
         ${NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION}
     )    
 
-    # Include directories
-    target_include_directories(${NAME} PUBLIC inc)
-
     #Code Coverage
     if(CODE_COVERAGE)
         add_code_coverage(${NAME})
@@ -56,10 +53,7 @@ function(add_shared_library NAME VERSION)
     # Set target version
     set_target_properties(
         ${NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION}
-    )   
-
-    # Include directories
-    target_include_directories(${NAME} PUBLIC headers)
+    )      
 
     #Code Coverage
     if(BUILD_WITH_CODE_COVERAGE)
@@ -67,6 +61,45 @@ function(add_shared_library NAME VERSION)
     endif()
 
     # Install binaries
+    install(
+        TARGETS ${NAME}
+        ARCHIVE
+        LIBRARY
+        RUNTIME
+    )
+
+    # Install headers
+    install(DIRECTORY headers/ DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN ".*hpp")
+endfunction()
+
+
+
+# -----------------------------------------------------------------------------
+# Function to add Interface library
+# -----------------------------------------------------------------------------
+function(add_interface_library NAME VERSION)
+    # Add library target
+    add_library(${NAME} INTERFACE)
+
+    # Get SOVERSION
+    string(
+        REGEX MATCH
+              "^([0-9]+)"
+              SOVERSION
+              ${VERSION}
+    )
+
+    # Set target version
+    set_target_properties(
+        ${NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION}
+    )   
+
+    #Code Coverage
+    if(BUILD_WITH_CODE_COVERAGE)
+        # add_code_coverage(${NAME})
+    endif()
+
+    # Install Interfaces
     install(
         TARGETS ${NAME}
         ARCHIVE
@@ -115,9 +148,10 @@ endfunction()
 
 # -----------------------------------------------------------------------------
 # Function to create unitTest executable
+# Use extra argument (ARGN) to Add dependendies only needed for the test executable
 # -----------------------------------------------------------------------------
 
-function(add_unit_test NAME)
+function(add_unit_test NAME )
 
     message("🟢 Add Unitest for ${NAME}")
 
@@ -131,12 +165,12 @@ function(add_unit_test NAME)
     add_executable(${NAME}_test ${tests_SRC})
 
     # Find Google Test
-    find_package(GTest REQUIRED)
-
-    # Add test framework link libraries
+    find_package(GTest REQUIRED)    
+    
+    # Add test framework link libraries/dependencies
     target_link_libraries(
-        ${NAME}_test PRIVATE ${NAME} GTest::gtest GTest::gtest_main
-    )  
+        ${NAME}_test PRIVATE ${NAME} GTest::gtest GTest::gtest_main ${ARGN}
+    )      
 
     # Add code coverage link libraries
     target_compile_options( ${NAME}_test PRIVATE -coverage  -fprofile-arcs -ftest-coverage)
@@ -149,14 +183,36 @@ function(add_unit_test NAME)
         ./test_result/
         DISCOVERY_MODE
         PRE_TEST
-    )
+    )    
 
     # Test target dependencies
-    add_dependencies(${NAME}_test ${NAME})
+    add_dependencies(${NAME}_test ${NAME}) 
+    
+    #Check memory usage
+    memcheck(${NAME}_test)
 endfunction()
 
 
-
+# -----------------------------------------------------------------------------
+# Function to profile memory of a unit test (executable)
+# -----------------------------------------------------------------------------
+function(memcheck  UNIT_TEST)
+    find_program(VALGRIND "valgrind")
+    if (VALGRIND)
+        add_custom_target(${UNIT_TEST}_memchecked
+        COMMAND valgrind
+        --error-exitcode=1
+        --tool=memcheck
+        --leak-check=full
+        --show-reachable=yes
+        --track-fds=yes
+        --errors-for-leak-kinds=definite
+        --show-leak-kinds=definite $<TARGET_FILE:${UNIT_TEST}>)
+    else()
+        message("🔴 Valgrind need to be installed to profile memory usage/leak")
+    endif()     
+    
+endfunction()
 
 
 # additional target to perform clang-format run, requires clang-format
@@ -168,26 +224,26 @@ file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
 #     if (NOT ${PROJECT_TRDPARTY_DIR_FOUND} EQUAL -1)
 #         list(REMOVE_ITEM ALL_SOURCE_FILES ${SOURCE_FILE})
 #     endif ()
-# endforeach ()
+# # endforeach ()
 
-add_custom_target(
-        clangformat
-        COMMAND "C:/Users/Siebenou/Documents/Projects/C++/Tools/winlibs-x86_64-mcf-seh-gcc-13.2.0-llvm-16.0.6-mingw-w64ucrt-11.0.1-r2/mingw64/bin/clang-format.exe"
-        -style=LLVM
-        -i
-        ${ALL_SOURCE_FILES}
-)
+# add_custom_target(
+#         clangformat
+#         COMMAND "C:/Users/Siebenou/Documents/Projects/C++/Tools/winlibs-x86_64-mcf-seh-gcc-13.2.0-llvm-16.0.6-mingw-w64ucrt-11.0.1-r2/mingw64/bin/clang-format.exe"
+#         -style=LLVM
+#         -i
+#         ${ALL_SOURCE_FILES}
+# )
 
 
 
-add_custom_target(
-        cppcheck
-        COMMAND /usr/bin/cppcheck
-        --enable=warning,performance,portability,information,missingInclude
-        --std=c++11
-        --library=qt.cfg
-        --template="[{severity}][{id}] {message} {callstack} \(On {file}:{line}\)"
-        --verbose
-        --quiet
-        ${ALL_SOURCE_FILES}
-)
+# add_custom_target(
+#         cppcheck
+#         COMMAND /usr/bin/cppcheck
+#         --enable=warning,performance,portability,information,missingInclude
+#         --std=c++11
+#         --library=qt.cfg
+#         --template="[{severity}][{id}] {message} {callstack} \(On {file}:{line}\)"
+#         --verbose
+#         --quiet
+#         ${ALL_SOURCE_FILES}
+# )
