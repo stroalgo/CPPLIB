@@ -80,6 +80,91 @@ public:
              std::forward<Args>(pArgs)...);
   };
 
+  /**
+   * @brief Write a Debug message
+   *
+   * @tparam Args Type
+   * @param pModuleName Module name concerned
+   * @param pFormat Message format
+   * @param pArgs Messages
+   */
+  template <typename... Args>
+  inline void Debug(const std::string &pModuleName,
+                    const spdlog::format_string_t<Args...> pFormat,
+                    Args &&...pArgs) {
+
+    WriteLog(spdlog::level::debug, pModuleName, pFormat,
+             std::forward<Args>(pArgs)...);
+  };
+
+  /**
+   * @brief Write a Info message
+   *
+   * @tparam Args Type
+   * @param pModuleName Module name concerned
+   * @param pFormat Message format
+   * @param pArgs Messages
+   */
+  template <typename... Args>
+  inline void Info(const std::string &pModuleName,
+                   const spdlog::format_string_t<Args...> pFormat,
+                   Args &&...pArgs) {
+
+    WriteLog(spdlog::level::info, pModuleName, pFormat,
+             std::forward<Args>(pArgs)...);
+  };
+
+  /**
+   * @brief Write a Warning message
+   *
+   * @tparam Args Type
+   * @param pModuleName Module name concerned
+   * @param pFormat Message format
+   * @param pArgs Messages
+   */
+  template <typename... Args>
+  inline void Warning(const std::string &pModuleName,
+                      const spdlog::format_string_t<Args...> pFormat,
+                      Args &&...pArgs) {
+
+    WriteLog(spdlog::level::warn, pModuleName, pFormat,
+             std::forward<Args>(pArgs)...);
+  };
+
+  /**
+   * @brief Write a Error message
+   *
+   * @tparam Args Type
+   * @param pModuleName Module name concerned
+   * @param pFormat Message format
+   * @param pArgs Messages
+   */
+  template <typename... Args>
+  inline void Error(const std::string &pModuleName,
+                    const spdlog::format_string_t<Args...> pFormat,
+                    Args &&...pArgs) {
+
+    WriteLog(spdlog::level::err, pModuleName, pFormat,
+             std::forward<Args>(pArgs)...);
+  };
+
+  /**
+   * @brief Write a critical message
+   *
+   * @tparam Args Type
+   * @param pModuleName Module name concerned
+   * @param pFormat Message format
+   * @param pArgs Messages
+   */
+  template <typename... Args>
+  inline void Critical(const std::string &pModuleName,
+                       const spdlog::format_string_t<Args...> pFormat,
+                       Args &&...pArgs) {
+
+    WriteLog(spdlog::level::critical, pModuleName, pFormat,
+             std::forward<Args>(pArgs)...);
+  };
+
   friend class Utilities::Common::GenericSingleton<Logger>;
 
 private:
