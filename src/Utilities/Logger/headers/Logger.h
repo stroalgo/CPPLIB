@@ -61,7 +61,8 @@ public:
    * @param pModuleName Name of the module or library
    * @param pLogLevel Log level for the module or library
    */
-  void SetModuleLogLevel(const std::string &pModuleName, LogLevel pLogLevel);
+  void SetModuleLogLevel(const std::string &pModuleName,
+                         const spdlog::level::level_enum pLogLevel);
 
   /**
    * @brief Write a trace message
@@ -197,13 +198,13 @@ private:
       if (lLogger->second != nullptr) {
         lLogger->second->log(pLogLevel, pFormat, std::forward<Args>(pArgs)...);
       } else {
-        HandleWriteFailure(
-            pModuleName, "Unable to write Log : Logger for Module {} is null");
+        HandleWriteFailure("Unable to write Log : Logger for Module {} is null",
+                           pModuleName);
       }
     } else {
 
-      HandleWriteFailure(pModuleName,
-                         "Unable to write Log : Module {} does not exist");
+      HandleWriteFailure("Unable to write Log : Module {} does not exist",
+                         pModuleName);
     }
   };
 
@@ -215,8 +216,8 @@ private:
    * @param pFormat
    */
   template <typename... Args>
-  void HandleWriteFailure(const std::string &pModuleName,
-                          const spdlog::format_string_t<Args...> &pFormat) {
+  void HandleWriteFailure(const spdlog::format_string_t<Args...> &pFormat,
+                          const std::string &pModuleName) {
     auto lLogger =
         m_Loggers->find(std::string(Utilities::Constants::c_LoggerModuleName));
 

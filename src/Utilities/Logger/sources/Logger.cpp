@@ -70,6 +70,27 @@ void Logger::RegisterModule(const std::string &pModuleName) {
   }
 }
 
+void Logger::SetModuleLogLevel(const std::string &pModuleName,
+                               const spdlog::level::level_enum pLogLevel) {
+
+  // Find the logger related to module
+  auto lLogger = m_Loggers->find(pModuleName);
+
+  // Set level if Module is registered
+  if (lLogger != m_Loggers->end()) {
+    if (lLogger->second != nullptr) {
+      lLogger->second->set_level(pLogLevel);
+    } else {
+      HandleWriteFailure("Unable to set level : Logger for Module {} is null",
+                         pModuleName);
+    }
+  } else {
+
+    HandleWriteFailure("Unable to set level : Module {} does not exist",
+                       pModuleName);
+  }
+}
+
 void Logger::ShutDown() {
   spdlog::drop_all();
   spdlog::shutdown();
