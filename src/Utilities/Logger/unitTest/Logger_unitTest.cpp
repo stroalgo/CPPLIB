@@ -27,8 +27,8 @@ protected:
     return ss.str();
   }
 
-  void CheckLogsData(const std::string &pLogPath, const std::string &pPattern,
-                     int pCount) {
+  void CheckLogsStructure(const std::string &pLogPath,
+                          const std::string &pPattern, int pCount) {
 
     int lCount{0};
     // Open the Log file
@@ -55,6 +55,33 @@ protected:
     } else {
       std::cout << pLogPath << "file not exists \n";
       FAIL();
+    }
+  }
+
+  bool CheckWrittenData(const std::string &pLogPath,
+                        const std::string &pLogMsg) {
+
+    bool lRet{false};
+    // Open the Log file
+    std::ifstream lInputFile(pLogPath);
+
+    if (lInputFile.is_open()) {
+      std::string lLine{};
+      while (std::getline(lInputFile, lLine)) {
+        if (lLine.find(pLogMsg)) {
+          lRet = true;
+          break;
+        }
+      }
+
+      // Close the file
+      lInputFile.close();
+
+      return lRet;
+
+    } else {
+      std::cout << pLogPath << "file not exists \n";
+      return lRet;
     }
   }
 };
@@ -115,24 +142,138 @@ TEST_F(LoggerTest, LogsFilesCreated) {
 TEST_F(LoggerTest, Trace) {
 
   // Write trace message for  LOGGER component
+  std::string lLogMsg = "Trace log message number 1-one";
   Utilities::Log::Logger::GetInstance().Trace(
-      std::string(Utilities::Constants::c_LoggerModuleName),
-      "Trace log message number 1-one");
+      std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
 
   // Expect only 1 trace log
   std::stringstream lLogFilePath{};
   lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
-  CheckLogsData(lLogFilePath.str(), "[Module_Library] [trace]", 1);
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [trace]", 1);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 
   // Write trace message for  LOGGER component
+  lLogMsg = "Trace log message number 2-two";
   Utilities::Log::Logger::GetInstance().Trace(
-      std::string(Utilities::Constants::c_LoggerModuleName),
-      "Trace log message number 2-two");
+      std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
 
   // Expect only 3 trace logs
   lLogFilePath.str("");
   lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
-  CheckLogsData(lLogFilePath.str(), "[LOGGER] [trace]", 3);
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [trace]", 3);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+}
+
+TEST_F(LoggerTest, Debug) {
+
+  std::string lLogMsg = "Debug log message number 1-one";
+  Utilities::Log::Logger::GetInstance().Debug("Module_Library", lLogMsg);
+
+  // Expect only 1 Debug log
+  std::stringstream lLogFilePath{};
+  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [debug]", 1);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+
+  // Write another debug message
+  lLogMsg = "Debug log message number 2-two";
+  Utilities::Log::Logger::GetInstance().Debug("Module_Library", lLogMsg);
+
+  // Expect only 2 debug logs
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [debug]", 2);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+}
+
+TEST_F(LoggerTest, Info) {
+
+  std::string lLogMsg = "Info log message number 1-one";
+  Utilities::Log::Logger::GetInstance().Info("Module_Library", lLogMsg);
+
+  // Expect only 1 Info log
+  std::stringstream lLogFilePath{};
+  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [info]", 1);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+
+  // Write another Info message
+  lLogMsg = "Info log message number 2-two";
+  Utilities::Log::Logger::GetInstance().Info("Module_Library", lLogMsg);
+
+  // Expect only 2 Info logs
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [info]", 2);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+}
+
+TEST_F(LoggerTest, Warning) {
+
+  std::string lLogMsg = "Warning log message number 1-one";
+  Utilities::Log::Logger::GetInstance().Warning("Module_Library", lLogMsg);
+
+  // Expect only 1 Warning log
+  std::stringstream lLogFilePath{};
+  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [warning]", 1);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+
+  // Write another Warning message
+  lLogMsg = "Warning log message number 2-two";
+  Utilities::Log::Logger::GetInstance().Warning("Module_Library", lLogMsg);
+
+  // Expect only 2 Warning logs
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [warning]", 2);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+}
+
+TEST_F(LoggerTest, Error) {
+
+  std::string lLogMsg = "Error log message number 1-one";
+  Utilities::Log::Logger::GetInstance().Error(
+      std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
+
+  // Expect only 2 Error log
+  std::stringstream lLogFilePath{};
+  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 2);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+
+  // Write another Error message
+  lLogMsg = "Error log message number 2-two";
+  Utilities::Log::Logger::GetInstance().Error(
+      std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
+
+  // Expect only 3 Error logs
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 3);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+}
+
+TEST_F(LoggerTest, critical) {
+
+  std::string lLogMsg = "critical log message number 1-one";
+  Utilities::Log::Logger::GetInstance().Critical("Module_Library", lLogMsg);
+
+  // Expect only 1 critical log
+  std::stringstream lLogFilePath{};
+  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [critical]", 1);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+
+  // Write another critical message
+  lLogMsg = "critical log message number 2-two";
+  Utilities::Log::Logger::GetInstance().Critical("Module_Library", lLogMsg);
+
+  // Expect only 2 critical logs
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [critical]", 2);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 }
 
 TEST_F(LoggerTest, ShutDown) {
