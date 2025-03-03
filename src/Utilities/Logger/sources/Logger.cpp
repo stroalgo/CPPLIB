@@ -86,9 +86,60 @@ void Logger::SetModuleLogLevel(const std::string &pModuleName,
     }
   } else {
 
-    HandleWriteFailure("Unable to set level : Module {} does not exist",
+    HandleWriteFailure("Unable to set level : Module {} is not registred",
                        pModuleName);
   }
+}
+
+const std::string Logger::GetModuleLevel(const std::string &pModuleName) {
+
+  std::string lRet{};
+  // Find the logger related to module
+  auto lLogger = m_Loggers->find(pModuleName);
+
+  // Set level if Module is registered
+  if (lLogger != m_Loggers->end()) {
+    if (lLogger->second != nullptr) {
+      lRet = LogLevelTostring(lLogger->second->level());
+    } else {
+      HandleWriteFailure("Unable to set level : Logger for Module {} is null",
+                         pModuleName);
+    }
+  } else {
+
+    HandleWriteFailure("Unable to get level : Module {} is not registred",
+                       pModuleName);
+  }
+  return lRet;
+}
+
+const std::string
+Logger::LogLevelTostring(const spdlog::level::level_enum pLogLevel) {
+  std::string lRet{};
+  switch (pLogLevel) {
+  case spdlog::level::trace:
+    lRet = "trace";
+    break;
+  case spdlog::level::debug:
+    lRet = "debug";
+    break;
+  case spdlog::level::info:
+    lRet = "info";
+    break;
+  case spdlog::level::warn:
+    lRet = "warning";
+    break;
+  case spdlog::level::err:
+    lRet = "error";
+    break;
+  case spdlog::level::critical:
+    lRet = "critical";
+    break;
+  default:
+    lRet = "";
+    break;
+  }
+  return lRet;
 }
 
 void Logger::ShutDown() {

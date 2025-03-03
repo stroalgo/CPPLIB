@@ -309,11 +309,26 @@ TEST_F(LoggerTest, LogLevelunRegistredModule) {
 
   // Expect a new error log written
   std::stringstream lLogFilePath{};
-  std::string lLogMsg =
-      "Unable to set level : Module unRegistred_Module_Library does not exist";
+  std::string lLogMsg = "Unable to set level : Module "
+                        "unRegistred_Module_Library is not registred";
   lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 4);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+}
+
+TEST_F(LoggerTest, GetModuleLogLevel) {
+  EXPECT_EQ(Utilities::Log::Logger::GetInstance().GetModuleLevel(
+                std::string(Utilities::Constants::c_LoggerModuleName)),
+            "info");
+
+  // Change log level to info level
+  Utilities::Log::Logger::GetInstance().SetModuleLogLevel(
+      std::string(Utilities::Constants::c_LoggerModuleName),
+      spdlog::level::trace);
+
+  EXPECT_EQ(Utilities::Log::Logger::GetInstance().GetModuleLevel(
+                std::string(Utilities::Constants::c_LoggerModuleName)),
+            "trace");
 }
 
 TEST_F(LoggerTest, ShutDown) {

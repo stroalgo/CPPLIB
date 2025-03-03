@@ -65,6 +65,14 @@ public:
                          const spdlog::level::level_enum pLogLevel);
 
   /**
+   * @brief Get the Module Log Level
+   *
+   * @param pModuleName Name of the module
+   * @return The level of module logger
+   */
+  const std::string GetModuleLevel(const std::string &pModuleName);
+
+  /**
    * @brief Write a trace message
    *
    * @tparam Args Type
@@ -176,13 +184,13 @@ private:
   Logger();
 
   /**
-   * @brief
+   * @brief Write log in console, in file .txt and .json
    *
-   * @tparam Args
-   * @param pLogLevel
-   * @param pModuleName
-   * @param pFormat
-   * @param pArgs
+   * @tparam Args Type
+   * @param pLogLevel the log level
+   * @param pModuleName The module name concerned by the log
+   * @param pFormat Message format to use
+   * @param pArgs Extra args to incorporate
    */
   template <typename... Args>
   inline void WriteLog(const spdlog::level::level_enum &pLogLevel,
@@ -209,11 +217,11 @@ private:
   };
 
   /**
-   * @brief
+   * @brief Write any failure using the module LOGGER registred at construction
    *
-   * @tparam Args
-   * @param pModuleName
-   * @param pFormat
+   * @tparam Args Type
+   * @param pModuleName Module Concerned by the failure
+   * @param pFormat Message format to use when writting
    */
   template <typename... Args>
   void HandleWriteFailure(const spdlog::format_string_t<Args...> &pFormat,
@@ -235,6 +243,14 @@ private:
           Utilities::Constants::c_LoggerModuleName);
     }
   }
+
+  /**
+   * @brief Convert spdlog level into string
+   *
+   * @param pLogLevel The log level
+   * @return Log level as string
+   */
+  const std::string LogLevelTostring(const spdlog::level::level_enum pLogLevel);
 
   /**
    * @brief Registered loggers container
