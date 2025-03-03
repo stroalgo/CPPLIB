@@ -73,6 +73,13 @@ public:
   const std::string GetModuleLevel(const std::string &pModuleName);
 
   /**
+   * @brief Retrieve levels for all registered modules
+   *
+   * @return A map  containing module as key and level as value
+   */
+  const std::map<std::string, std::string> GetLogLevels();
+
+  /**
    * @brief Write a trace message
    *
    * @tparam Args Type

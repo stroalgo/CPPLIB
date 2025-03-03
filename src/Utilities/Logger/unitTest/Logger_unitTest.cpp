@@ -331,6 +331,25 @@ TEST_F(LoggerTest, GetModuleLogLevel) {
             "trace");
 }
 
+TEST_F(LoggerTest, GetLogLevels) {
+  std::vector<std::string> lExpectedKeys{
+      "Module_Library", std::string(Utilities::Constants::c_LoggerModuleName)};
+
+  // Retrieve loggers level
+  const auto &lLogLevels{Utilities::Log::Logger::GetInstance().GetLogLevels()};
+
+  // Exepect only 2 logger registred
+  EXPECT_EQ(lLogLevels.size(), 2);
+
+  // Expect LOGGER and Module_Library as logger keys and trace as level for both
+  for (const auto &[lKey, lValue] : lLogLevels) {
+    auto lContain =
+        std::find(lExpectedKeys.cbegin(), lExpectedKeys.cend(), lKey);
+    EXPECT_NE(lContain, lExpectedKeys.cend());
+    EXPECT_EQ(lValue, "trace");
+  }
+}
+
 TEST_F(LoggerTest, ShutDown) {
   // Shutdown the logger after usage
   Utilities::Log::Logger::GetInstance().ShutDown();

@@ -6,6 +6,7 @@
 
 #include "Logger.h"
 
+#include <algorithm>
 #include <format>
 #include <memory>
 #include <spdlog/sinks/daily_file_sink.h>
@@ -139,6 +140,16 @@ Logger::LogLevelTostring(const spdlog::level::level_enum pLogLevel) {
     lRet = "";
     break;
   }
+  return lRet;
+}
+
+const std::map<std::string, std::string> Logger::GetLogLevels() {
+  std::map<std::string, std::string> lRet{};
+  std::for_each(m_Loggers->cbegin(), m_Loggers->cend(),
+                [&lRet, this](const auto &pLogger) {
+                  lRet.try_emplace(pLogger.first,
+                                   LogLevelTostring(pLogger.second->level()));
+                });
   return lRet;
 }
 
