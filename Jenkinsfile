@@ -60,25 +60,25 @@ pipeline {
     stage('Build') {    
       steps {
         sh 'echo "Building..."'        
-        sh 'cmake --build --preset conan-$buildTypeLower'        
+        sh 'cmake --build --parallel 4  --preset conan-$buildTypeLower'        
       }      
     }
 
-    // stage('Test') {
-    //   steps {
-    //     sh 'echo "Running Unit Tests..."'   
-    //     sh 'ctest -V  --test-dir build/$BuildType --output-junit  unitTestReports.xml'     
+    stage('Test') {
+      steps {
+        sh 'echo "Running Unit Tests..."'   
+        sh 'ctest -V --build-config $BuildType --test-dir build/$BuildType --output-junit  unitTestReports.xml'     
      
-    //     sh 'echo "Running Coverage Tests..."'
-    //     sh 'ctest -V -T Coverage --test-dir build/$BuildType'
-    //     sh 'gcovr -r build/$BuildType --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
-    //   }
-    //   post {
-    //     success  {
-    //         junit (testResults:'build/$BuildType/unitTestReports.xml', allowEmptyResults : true)
-    //     }
-    //   }
-    // }
+        sh 'echo "Running Coverage Tests..."'
+        sh 'ctest -V -T Coverage --test-dir build/$BuildType'
+        sh 'gcovr -r build/$BuildType --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
+      }
+      post {
+        success  {
+            junit (testResults:'build/$BuildType/unitTestReports.xml', allowEmptyResults : true)
+        }
+      }
+    }
 
      stage('SonarQube') {
 

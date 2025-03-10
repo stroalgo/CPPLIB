@@ -16,6 +16,17 @@
 // Last test must clean up logfiles produced
 class LoggerTest : public ::testing::Test {
 protected:
+  void SetUp() override {
+    // Register a new module or library
+    Utilities::Log::Logger::GetInstance().RegisterModule("Module_Library");
+  }
+
+  void TearDown() override {
+    if (std::filesystem::exists("Logs")) {
+      std::filesystem::remove_all("Logs");
+    }
+  }
+
   std::string CurrentDateToString() {
     using namespace boost::gregorian;
 
@@ -89,9 +100,6 @@ protected:
 
 TEST_F(LoggerTest, RegisterModule) {
 
-  // Register a new module or library
-  Utilities::Log::Logger::GetInstance().RegisterModule("Module_Library");
-
   // Logger module is registred on GetInstance first call
   EXPECT_NE(spdlog::get(std::string(Utilities::Constants::c_LoggerModuleName)),
             nullptr);
@@ -111,6 +119,7 @@ TEST_F(LoggerTest, LogsFilesCreated) {
   Utilities::Log::Logger::GetInstance().Trace(
       "Module_Library", "trace message concerned Module_library {}",
       std::string("value_13"));
+
   // Expect Logs/Module_Library_{CurrentDate}.txt  for module_library
   // component created
   std::stringstream lLogFilePath{};
@@ -142,28 +151,37 @@ TEST_F(LoggerTest, LogsFilesCreated) {
 
 TEST_F(LoggerTest, Trace) {
 
-  // Expect only 1 trace log
   std::stringstream lLogFilePath{};
   std::string lLogMsg = "trace message concerned Module_library value_13";
+
+  // Write trace message for module_library component
+  Utilities::Log::Logger::GetInstance().Trace("Module_Library", lLogMsg);
+
+  // Expect only 1 trace log
   lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [trace]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
 
   // Write trace message for  LOGGER component
   lLogMsg = "Trace log message number 1-one";
   Utilities::Log::Logger::GetInstance().Trace(
       std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
 
+  // Expect only 1 trace logs
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [trace]", 1);
+
   // Write trace message for  LOGGER component
   lLogMsg = "Trace log message number 2-two";
   Utilities::Log::Logger::GetInstance().Trace(
       std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
 
-  // Expect only 3 trace logs
-  lLogFilePath.str("");
-  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
-  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [trace]", 3);
+  // Expect only 2 trace logs
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [trace]", 2);
 }
 
 TEST_F(LoggerTest, Debug) {
@@ -238,10 +256,10 @@ TEST_F(LoggerTest, Error) {
   Utilities::Log::Logger::GetInstance().Error(
       std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
 
-  // Expect only 2 Error log
+  // Expect only 1 Error log
   std::stringstream lLogFilePath{};
   lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
-  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 2);
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 
   // Write another Error message
@@ -249,10 +267,10 @@ TEST_F(LoggerTest, Error) {
   Utilities::Log::Logger::GetInstance().Error(
       std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
 
-  // Expect only 3 Error logs
+  // Expect only 2 Error logs
   lLogFilePath.str("");
   lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
-  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 3);
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 2);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 }
 
@@ -280,6 +298,21 @@ TEST_F(LoggerTest, critical) {
 
 TEST_F(LoggerTest, ChangeLogLevel) {
 
+  // Write another trace message
+  std::string lLogMsg = "Trace log message number 1-one";
+  Utilities::Log::Logger::GetInstance().Trace(
+      std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
+
+  // Write another trace message
+  lLogMsg = "Trace log message number 2-two";
+  Utilities::Log::Logger::GetInstance().Trace(
+      std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
+
+  // Write another trace message
+  lLogMsg = "Trace log message number 3-three";
+  Utilities::Log::Logger::GetInstance().Trace(
+      std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
+
   // Expect only 3 trace logs
   std::stringstream lLogFilePath{};
   lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
@@ -291,7 +324,7 @@ TEST_F(LoggerTest, ChangeLogLevel) {
       spdlog::level::info);
 
   // Write another trace message
-  std::string lLogMsg = "Trace log message number 3-three";
+  lLogMsg = "Trace log message number 4-four";
   Utilities::Log::Logger::GetInstance().Trace(
       std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
 
@@ -307,28 +340,28 @@ TEST_F(LoggerTest, LogLevelunRegistredModule) {
   Utilities::Log::Logger::GetInstance().SetModuleLogLevel(
       "unRegistred_Module_Library", spdlog::level::info);
 
-  // Expect a new error log written
+  // Expect only 1 error log written
   std::stringstream lLogFilePath{};
   std::string lLogMsg = "Unable to set level : Module "
                         "unRegistred_Module_Library is not registred";
   lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
-  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 4);
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 }
 
 TEST_F(LoggerTest, GetModuleLogLevel) {
   EXPECT_EQ(Utilities::Log::Logger::GetInstance().GetModuleLevel(
                 std::string(Utilities::Constants::c_LoggerModuleName)),
-            "info");
+            "trace");
 
   // Change log level to info level
   Utilities::Log::Logger::GetInstance().SetModuleLogLevel(
       std::string(Utilities::Constants::c_LoggerModuleName),
-      spdlog::level::trace);
+      spdlog::level::debug);
 
   EXPECT_EQ(Utilities::Log::Logger::GetInstance().GetModuleLevel(
                 std::string(Utilities::Constants::c_LoggerModuleName)),
-            "trace");
+            "debug");
 }
 
 TEST_F(LoggerTest, GetLogLevels) {
@@ -356,9 +389,4 @@ TEST_F(LoggerTest, ShutDown) {
 
   EXPECT_EQ(nullptr,
             spdlog::get(std::string(Utilities::Constants::c_LoggerModuleName)));
-
-  // Clean-up tests folder
-  if (std::filesystem::exists("Logs")) {
-    std::filesystem::remove_all("Logs");
-  }
 }
