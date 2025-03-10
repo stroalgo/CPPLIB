@@ -1,0 +1,4 @@
+{
+    "sonarQubeUri": "http://172.17.0.1:9000",
+    "projectKey": "cpplib"
+}
