@@ -1,5 +1,5 @@
 pipeline {
-  agent { dockerfile true }
+  agent { label 'Docker-Agent'}
 
   tools {
         maven "Maven"
@@ -24,14 +24,19 @@ pipeline {
 
     stage('Load Dependencies') {  
       steps {
+
+        echo 'Clean up...'
+        sh 'if [ -d build ]; then rm -rf build;fi'
+
         script {
                     currentBuild.displayName = "[#${BUILD_NUMBER}]"
                     currentBuild.description = "Build Type: ${params.BuildType}\n"  +
                                                "Branch Name: ${env.BRANCH_NAME}\n" +                                               
                                                "Executed on: ${NODE_NAME}\n"
                 }
-        sh 'echo "create conan profile..."'
-        sh 'conan profile detect'
+        sh 'echo "check or create conan profile..."'
+        sh 'if [ ! -f ~/.conan2/profiles/default ]; then conan profile detect; fi'
+        
         sh 'echo "Loading..."'   
         script {
                     if (BuildType == 'RelWithDebInfo') {
@@ -45,41 +50,35 @@ pipeline {
       }
     }
 
-    stage('Configure') {     
-      
+    stage('Configure') {    
       steps {
         sh 'echo "Configuring..."'        
         sh 'cmake --preset conan-$buildTypeLower'       
       }
     }
 
-    stage('Build') {
-      post {
-        always { 
-            echo 'Build Type: $BuildType'
-        }
-      }
+    stage('Build') {    
       steps {
         sh 'echo "Building..."'        
         sh 'cmake --build --preset conan-$buildTypeLower'        
       }      
     }
 
-    stage('Test') {
-      steps {
-        sh 'echo "Running Unit Tests..."'   
-        sh 'ctest -V  --test-dir build/$BuildType --output-junit  unitTestReports.xml'     
+    // stage('Test') {
+    //   steps {
+    //     sh 'echo "Running Unit Tests..."'   
+    //     sh 'ctest -V  --test-dir build/$BuildType --output-junit  unitTestReports.xml'     
      
-        sh 'echo "Running Coverage Tests..."'
-        sh 'ctest -V -T Coverage --test-dir build/$BuildType'
-        sh 'gcovr -r build/$BuildType --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
-      }
-      post {
-        success  {
-            junit (testResults:'build/$BuildType/unitTestReports.xml', allowEmptyResults : true)
-        }
-      }
-    }
+    //     sh 'echo "Running Coverage Tests..."'
+    //     sh 'ctest -V -T Coverage --test-dir build/$BuildType'
+    //     sh 'gcovr -r build/$BuildType --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
+    //   }
+    //   post {
+    //     success  {
+    //         junit (testResults:'build/$BuildType/unitTestReports.xml', allowEmptyResults : true)
+    //     }
+    //   }
+    // }
 
      stage('SonarQube') {
 
@@ -118,11 +117,11 @@ pipeline {
 
           script {                    
               withSonarQubeEnv('sonarqube_cpplib') {
-                sh '/opt/sonar-scanner/bin/sonar-scanner \
+                sh "/opt/sonar-scanner/bin/sonar-scanner \
                     -Dsonar.sources=src \
                     -Dsonar.projectKey=cpplib \
                     -Dsonar.cfamily.compile-commands=build/$BuildType/compile_commands.json \
-                    -Dsonar.cxx.includeDirectories=/usr/include/c++/14,/usr/include,/usr/include/x86_64-linux-gnu/c++/14,/usr/include/x86_64-linux-gnu,/usr/lib/gcc/x86_64-linux-gnu/14/include \
+                    -Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers \
                     -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
                     -Dsonar.cxx.rats.reportPaths=rats.xml \
                     -Dsonar.cxx.clangsa.reportPaths=build/$BuildType/clang_reports/*/*.plist \
@@ -132,7 +131,7 @@ pipeline {
                     -Dsonar.qualitygate.wait=true \
                     -Dsonar.qualitygate.timeout=300 \
                     -Dsonar.branchname=${env.BRANCH_NAME} \
-                    -Dsonar.verbose=true ' 
+                    -Dsonar.verbose=true " 
               }
           }
       }

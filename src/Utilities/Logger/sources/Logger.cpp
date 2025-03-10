@@ -7,7 +7,6 @@
 #include "Logger.h"
 
 #include <algorithm>
-#include <format>
 #include <memory>
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>

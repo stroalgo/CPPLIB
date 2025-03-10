@@ -15,7 +15,7 @@
 #include "Constants.h"
 #include "GenericSingleton.h"
 
-#include <format>
+
 #include <map>
 #include <memory>
 #include <spdlog/common.h>
@@ -94,7 +94,7 @@ public:
 
     WriteLog(spdlog::level::trace, pModuleName, pFormat,
              std::forward<Args>(pArgs)...);
-  };
+  }
 
   /**
    * @brief Write a Debug message
@@ -111,7 +111,7 @@ public:
 
     WriteLog(spdlog::level::debug, pModuleName, pFormat,
              std::forward<Args>(pArgs)...);
-  };
+  }
 
   /**
    * @brief Write a Info message
@@ -128,7 +128,7 @@ public:
 
     WriteLog(spdlog::level::info, pModuleName, pFormat,
              std::forward<Args>(pArgs)...);
-  };
+  }
 
   /**
    * @brief Write a Warning message
@@ -145,7 +145,7 @@ public:
 
     WriteLog(spdlog::level::warn, pModuleName, pFormat,
              std::forward<Args>(pArgs)...);
-  };
+  }
 
   /**
    * @brief Write a Error message
@@ -162,7 +162,7 @@ public:
 
     WriteLog(spdlog::level::err, pModuleName, pFormat,
              std::forward<Args>(pArgs)...);
-  };
+  }
 
   /**
    * @brief Write a critical message
@@ -179,7 +179,7 @@ public:
 
     WriteLog(spdlog::level::critical, pModuleName, pFormat,
              std::forward<Args>(pArgs)...);
-  };
+  }
 
   friend class Utilities::Common::GenericSingleton<Logger>;
 
@@ -221,7 +221,7 @@ private:
       HandleWriteFailure("Unable to write Log : Module {} does not exist",
                          pModuleName);
     }
-  };
+  }
 
   /**
    * @brief Write any failure using the module LOGGER registred at construction

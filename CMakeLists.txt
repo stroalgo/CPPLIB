@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.26.4)
+cmake_minimum_required(VERSION 3.25.1)
 
 #Apply Out-of-Source Builds Only
 if ("${CMAKE_BINARY_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")

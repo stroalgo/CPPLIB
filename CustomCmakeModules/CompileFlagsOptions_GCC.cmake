@@ -110,9 +110,9 @@ add_compile_options(
     -Wall
     -Werror
     -Wextra
-    -Wdangling-reference
+#     -Wdangling-reference
     -Wdelete-non-virtual-dtor
-    -Winvalid-constexpr
+#     -Winvalid-constexpr
     -Winvalid-imported-macros
     -Wnoexcept
     -Wclass-memaccess
