@@ -1,0 +1,519 @@
+openapi: 3.0.0
+info:
+  title: LOGGER API
+  description: API to manage LOGGER
+  version: 1.0.0
+servers:
+  - url: http://localhost:13130/api
+    description: Local development server
+paths:
+  /Logs:
+    get:
+      summary: Get Logs
+      description: Returns a list of  logs from start_date to end_date
+      parameters:
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'        
+      responses:
+        '200':
+          description: A list of logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LogItem'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete logs
+      description: Delete logs for all modules from start_date to end_date
+      parameters:
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'   
+      responses:
+        '204':
+          description: Logs deleted successfully
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /LogsByLevel:
+    get:
+      summary: Get logs by level
+      description: Returns a list of logs with level specifed from start_date to end_date
+      parameters:
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'  
+        - $ref: '#/components/parameters/level'          
+      responses:
+        '200':
+          description: A list of logs at the wanted level
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LogItem'
+        '404':
+          description: Level not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete logs by level 
+      description: Delete logs with level specifed for all modules from start_date to end_date
+      parameters:
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'  
+        - $ref: '#/components/parameters/level'  
+      responses:
+        '204':
+          description: Logs deleted successfully
+        '404':
+          description: level not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /ModuleLogs:
+    get:
+      summary: Get logs for a module
+      description: Returns a list of logs for the module specifed from start_date to end_date
+      parameters:
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/module'         
+      responses:
+        '200':
+          description: A list of logs for the specified module
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LogItem'
+        '404':
+          description: Module not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete logs for a module
+      description: Delete logs for the module specifed from start_date to end_date
+      parameters:
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/module'       
+      responses:
+        '204':
+          description: Logs deleted successfully
+        '404':
+          description: module not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'                
+  /ModuleLogsByLevel  :
+    get:
+      summary: Get logs by level for a module
+      description: Returns a list of logs for the module and level  specifed from start_date to end_date
+      parameters:
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/module'   
+        - $ref: '#/components/parameters/level'      
+      responses:
+        '200':
+          description: A list of logs for the specified module
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LogItem'
+        '404':
+          description: Module or level not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete logs by level  for a module
+      description: Delete logs with level specifed for a module from start_date to end_date
+      parameters:
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'  
+        - $ref: '#/components/parameters/module'  
+        - $ref: '#/components/parameters/level'  
+      responses:
+        '204':
+          description: Logs deleted successfully
+        '404':
+          description: level not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /Levels:
+    get:
+      summary: Get logger levels of every modules
+      description: Returns a list of all module with their associated level      
+      responses:
+        '200':
+          description: A list of module with their level
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModuleLevelItem'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /ModuleLevel:
+    get:
+      summary: Get logger level for a module
+      description: Returns a the logger level for a module
+      parameters:        
+        - $ref: '#/components/parameters/module'         
+      responses:
+        '200':
+          description: A list of logs for the specified module
+          content:
+            application/json:
+              schema:
+                type: object                
+                $ref: '#/components/schemas/LevelItem'
+        '404':
+          description: Module not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'  
+    post:
+      summary: Set a logger level
+      description: Set a logger  level  for a module or all module
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModuleLevelItem'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuleLevelItem'
+        '400':
+          description: Invalid input (e.g., missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /ClearAllModule:
+   delete:
+      summary: Delete all logs for a module
+      description: Delete all logs for the given module
+      parameters:    
+        - $ref: '#/components/parameters/module'  
+      responses:
+        '204':
+          description: All Module logs deleted successfully
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /ClearAll: 
+    delete:
+      summary: Delete all logs
+      description: Delete all logs for all module      
+      responses:
+        '204':
+          description: All logs deleted successfully        
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /Enable:
+     post:
+      summary: Enable or Disable logger 
+      description: Enable or disable logger for a specific module or all modules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:              
+              $ref: '#/components/schemas/EnableItem'                    
+      responses:
+        '201':
+          description: Loggers enable/disable successfully
+          content:
+            application/json:
+               schema:
+                oneOf:                  
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/ModuleLevelItem'
+                  - type: object
+                    properties:
+                      disable:
+                        type: string                     
+                        default: OK
+        '400':
+          description: Invalid input (e.g., missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  
+    
+  # /todos/{id}:
+  #   get:
+  #     summary: Get a specific ToDo item
+  #     description: Returns a specific ToDo item by ID
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         description: ID of the ToDo item
+  #         required: true
+  #         type: integer
+  #     responses:
+  #       '200':
+  #         description: ToDo item found
+  #         schema:
+  #           $ref: '#/definitions/LogItem'
+  #       '404':
+  #         description: ToDo item not found
+  #   put:
+  #     summary: Update a specific ToDo item
+  #     description: Updates a specific ToDo item by ID
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         description: ID of the ToDo item
+  #         required: true
+  #         type: integer
+  #       - name: todo
+  #         in: body
+  #         description: Updated ToDo item
+  #         required: true
+  #         schema:
+  #           $ref: '#/definitions/LogItem'
+  #     responses:
+  #       '200':
+  #         description: ToDo item updated successfully
+  #         schema:
+  #           $ref: '#/definitions/LogItem'
+  #       '404':
+  #         description: ToDo item not found
+  #   delete:
+  #     summary: Delete a specific ToDo item
+  #     description: Deletes a specific ToDo item by ID
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         description: ID of the ToDo item
+  #         required: true
+  #         type: integer
+  #     responses:
+  #       '204':
+  #         description: ToDo item deleted successfully
+  #       '404':
+  #         description: ToDo item not found
+components:
+  parameters:
+    start_date:
+      name: start_date
+      in: path
+      required: true
+      description: start date of logs to retrieve
+      schema:
+            type: string
+            format: date-time 
+    end_date:
+      name: end_date
+      in: path
+      required: true
+      description: end date of logs to retrieve
+      schema:
+            type: string
+            format: date-time
+    level: 
+      name: level
+      in: path
+      required: true
+      description: level of logs to retrieve
+      schema:
+        $ref: '#/components/schemas/LevelType'
+    module:
+        in: path
+        name: module
+        description: module concerned
+        required: true
+        schema:
+            type: string
+  schemas:    
+    LogItem:
+      type: object
+      required:
+        - time
+        - module
+        - level
+        - message
+      properties:
+        time:
+          type: string
+          format: date-time
+          description: The time when log was written
+        module:          
+          description: The module concerned          
+          $ref: '#/components/schemas/ModuleType'
+        level:
+          description: The log level          
+          $ref: '#/components/schemas/LevelType'   
+        message:
+          type: string
+          description: The log message
+          default: app started  
+    ModuleLevelItem:
+      type: object
+      required:
+        - module
+        - level
+      properties:        
+        module:          
+          description: The module concerned          
+          $ref: '#/components/schemas/ModuleType' 
+        level:
+          description: The log level          
+          $ref: '#/components/schemas/LevelType'   
+    LevelItem:
+      type: object
+      required:    
+        - level
+      properties:                
+        level:
+          description: The log level          
+          $ref: '#/components/schemas/LevelType' 
+    EnableItem:
+      type: object
+      required:
+        - enable
+        - module
+      properties:
+        enable:
+          description: flags to enable or disable logger
+          type: boolean
+          default: true
+        Module:
+          description: The module concerned
+          $ref: '#/components/schemas/ModuleType' 
+    LevelType:      
+      enum:
+        - trace
+        - debug
+        - info
+        - warning
+        - error
+        - critical
+    ModuleType:
+      enum:
+        - all
+        - logger
+        - server
+        - settings
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: A brief description of the error
+        message:
+          type: string
+          description: A detailed error message
+        statusCode:
+          type: integer
+          description: The HTTP status code
+      example:
+        error: "Bad Request"
+        message: "The request body is missing the required 'title' field."
+        statusCode: 400
