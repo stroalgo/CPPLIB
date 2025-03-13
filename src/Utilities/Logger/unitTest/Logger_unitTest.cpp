@@ -488,6 +488,12 @@ TEST_F(LoggerTest, DeleteAllLogs) {
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [critical]", 0);
   EXPECT_TRUE(
       std::filesystem::is_empty(std::filesystem::path(lLogFilePath.str())));
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".json";
+  EXPECT_TRUE(
+      std::filesystem::is_empty(std::filesystem::path(lLogFilePath.str())));
 
   // Expect no logs present / Logs files for LOGGER is empty
   lLogFilePath.str("");
@@ -498,7 +504,69 @@ TEST_F(LoggerTest, DeleteAllLogs) {
   EXPECT_TRUE(
       std::filesystem::is_empty(std::filesystem::path(lLogFilePath.str())));
 
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".json";
+  EXPECT_TRUE(
+      std::filesystem::is_empty(std::filesystem::path(lLogFilePath.str())));
+
   // Expect Previous logs files have been deleted
   EXPECT_FALSE(std::filesystem::exists(lLoggerPreviousLogFilePath));
   EXPECT_FALSE(std::filesystem::exists(lModuleLibraryPreviousLogFilePath));
+}
+
+TEST_F(LoggerTest, DeleteAllModuleLogs) {
+
+  std::stringstream lLogFilePath{};
+  // Write log for Module_Library
+  std::string lLogMsg = "Critical log message about Module_Library";
+  Utilities::Log::Logger::GetInstance().Critical("Module_Library", lLogMsg);
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [critical]", 1);
+
+  // Create fake previous logs files
+  std::string lModuleLibraryPreviousLogFilePath{
+      "Logs/Module_Library/Module_Library_1313_01_13.txt"};
+  std::ofstream lModuleLibraryPreviousLogFile(
+      lModuleLibraryPreviousLogFilePath);
+  lModuleLibraryPreviousLogFile << "Very ancient log" << std::endl;
+  lModuleLibraryPreviousLogFile.close();
+
+  // Delete all logs
+  Utilities::Log::Logger::GetInstance().DeleteAllModuleLogs("Module_Library");
+
+  // Expect no present logs (.txt & .json) only  Module_Library
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [critical]", 0);
+  EXPECT_TRUE(
+      std::filesystem::is_empty(std::filesystem::path(lLogFilePath.str())));
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".json";
+  EXPECT_TRUE(
+      std::filesystem::is_empty(std::filesystem::path(lLogFilePath.str())));
+
+  // Expect Previous logs files have been deleted
+  EXPECT_FALSE(std::filesystem::exists(lModuleLibraryPreviousLogFilePath));
+}
+
+TEST_F(LoggerTest, DeleteAllLogsUnregistredModule) {
+
+  // Delete all logs for an unregistred module
+  EXPECT_THROW(Utilities::Log::Logger::GetInstance().DeleteAllModuleLogs(
+                   "unRegistred_Module_Library"),
+               Utilities::Exceptions::LoggerException);
+
+  // Except error log message for module LOGGER
+  std::stringstream lLogFilePath{};
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 1);
+  EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(),
+                               "Unable to delete logs : Module "
+                               "unRegistred_Module_Library is not registred"));
 }

@@ -10,6 +10,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <filesystem>
+#include <fmt/core.h>
 #include <fstream>
 #include <list>
 #include <memory>
@@ -171,38 +172,25 @@ void Logger::ShutDown() {
 }
 
 void Logger::DeleteAllLogs() {
-  std::for_each(
-      m_Loggers->cbegin(), m_Loggers->cend(), [this](const auto &pLogger) {
-        std::list<std::string> lListOfPath{};
-        for (const auto &lFilePath :
-             std::filesystem::directory_iterator{"Logs/" + pLogger.first}) {
-          lListOfPath.push_back(lFilePath.path().string());
-        }
-
-        // Clear the content of current used logfile
-        std::stringstream lLogFilePath{};
-        lLogFilePath << "Logs/" << pLogger.first << "/" << pLogger.first << "_"
-                     << CurrentDateToString() << ".txt";
-        lListOfPath.remove(lLogFilePath.str());
-        std::fstream lFileStreamTxt{};
-        lFileStreamTxt.open(lLogFilePath.str(),
-                            std::ofstream::out | std::ofstream::trunc);
-        lFileStreamTxt.close();
-        lLogFilePath.str("");
-        lLogFilePath << "Logs/" << pLogger.first << "/" << pLogger.first << "_"
-                     << CurrentDateToString() << ".json";
-        lListOfPath.remove(lLogFilePath.str());
-        std::fstream lFileStreamJson{};
-        lFileStreamJson.open(lLogFilePath.str(),
-                             std::ofstream::out | std::ofstream::trunc);
-        lFileStreamJson.close();
-
-        // Delete all logs files exept the current log file
-        for (const auto &lFilePath : lListOfPath) {
-          std::filesystem::remove(lFilePath);
-        }
-      });
+  std::for_each(m_Loggers->cbegin(), m_Loggers->cend(),
+                [this](const auto &pLogger) { DeleteLogs(pLogger.first); });
 }
+
+void Logger::DeleteAllModuleLogs(const std::string &pModuleName) {
+
+  // Find the logger related to module
+  auto lLogger = m_Loggers->find(pModuleName);
+
+  // Set level if Module is registered
+  if (lLogger != m_Loggers->end()) {
+    DeleteLogs(lLogger->first);
+  } else {
+    HandleWriteFailure("Unable to delete logs : Module {} is not registred",
+                       pModuleName);
+    throw Utilities::Exceptions::LoggerException(fmt::format(
+        "Unable to delete logs : Module {} is not registred", pModuleName));
+  }
+} // namespace Utilities::Log
 
 std::string Logger::CurrentDateToString() {
   using namespace boost::gregorian;
@@ -216,6 +204,38 @@ std::string Logger::CurrentDateToString() {
   ss.imbue(std::locale{ss.getloc(), df.get()});
   ss << d;
   return ss.str();
+}
+
+void Logger::DeleteLogs(const std::string &pModuleName) {
+
+  std::list<std::string> lListOfPath{};
+  for (const auto &lFilePath :
+       std::filesystem::directory_iterator{"Logs/" + pModuleName}) {
+    lListOfPath.push_back(lFilePath.path().string());
+  }
+
+  // Clear the content of current used logfile
+  std::stringstream lLogFilePath{};
+  lLogFilePath << "Logs/" << pModuleName << "/" << pModuleName << "_"
+               << CurrentDateToString() << ".txt";
+  lListOfPath.remove(lLogFilePath.str());
+  std::fstream lFileStreamTxt{};
+  lFileStreamTxt.open(lLogFilePath.str(),
+                      std::ofstream::out | std::ofstream::trunc);
+  lFileStreamTxt.close();
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/" << pModuleName << "/" << pModuleName << "_"
+               << CurrentDateToString() << ".json";
+  lListOfPath.remove(lLogFilePath.str());
+  std::fstream lFileStreamJson{};
+  lFileStreamJson.open(lLogFilePath.str(),
+                       std::ofstream::out | std::ofstream::trunc);
+  lFileStreamJson.close();
+
+  // Delete all logs files exept the current log file
+  for (const auto &lFilePath : lListOfPath) {
+    std::filesystem::remove(lFilePath);
+  }
 }
 
 } // namespace Utilities::Log

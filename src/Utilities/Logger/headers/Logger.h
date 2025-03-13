@@ -13,6 +13,7 @@
 #define LOGGER_HPP
 
 #include "Constants.h"
+#include "Exceptions.h"
 #include "GenericSingleton.h"
 
 #include <map>
@@ -23,7 +24,7 @@
 namespace Utilities::Log {
 
 /**
- * @brief
+ * @brief Class to Monitor activities by logging
  *
  */
 class Logger : public Utilities::Common::GenericSingleton<Logger> {
@@ -84,6 +85,13 @@ public:
    *
    */
   void DeleteAllLogs();
+
+  /**
+   * @brief Delete all logs for the given module
+   * @param pModuleName Name of the module or library
+   *
+   */
+  void DeleteAllModuleLogs(const std::string &pModuleName);
 
   /**
    * @brief Get Current date as string in a "yyyy-mm-dd" format
@@ -281,6 +289,14 @@ private:
   std::unique_ptr<std::map<std::string, std::shared_ptr<spdlog::logger>>>
       m_Loggers = std::make_unique<
           std::map<std::string, std::shared_ptr<spdlog::logger>>>();
+
+  /**
+   * @brief Empty the current logfile and delete previous logfiles for the
+   * module
+   *
+   * @param pModuleName Module concerned by the deletion
+   */
+  void DeleteLogs(const std::string &pModuleName);
 };
 
 } // namespace Utilities::Log
