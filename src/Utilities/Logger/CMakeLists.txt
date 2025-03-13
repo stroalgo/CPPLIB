@@ -29,8 +29,9 @@ target_include_directories(
 target_link_libraries(
     ${PROJECT_NAME}
     PUBLIC
-        spdlog::spdlog           
+        Boost::date_time
         Common
+        spdlog::spdlog           
 )
 
 
@@ -46,6 +47,6 @@ endif()
 # Tests
 # -----------------------------------------------------------------------------
 if(BUILD_TESTING)    
-    set(DEPENDENCIES Boost::date_time)
+    set(DEPENDENCIES )
     add_unit_test(${PROJECT_NAME} ${DEPENDENCIES})    
 endif()

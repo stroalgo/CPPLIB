@@ -12,8 +12,6 @@
 #include <regex>
 #include <sstream>
 
-// Logger singleton is not destroy for each test
-// Last test must clean up logfiles produced
 class LoggerTest : public ::testing::Test {
 protected:
   void SetUp() override {
@@ -25,18 +23,6 @@ protected:
     if (std::filesystem::exists("Logs")) {
       std::filesystem::remove_all("Logs");
     }
-  }
-
-  std::string CurrentDateToString() {
-    using namespace boost::gregorian;
-
-    date d = day_clock::local_day();
-    std::unique_ptr<date_facet> df = std::make_unique<date_facet>("%Y-%m-%d");
-
-    std::stringstream ss;
-    ss.imbue(std::locale{ss.getloc(), df.get()});
-    ss << d;
-    return ss.str();
   }
 
   void CheckLogsStructure(const std::string &pLogPath,
@@ -111,6 +97,23 @@ TEST_F(LoggerTest, RegisterModule) {
   // handled
   EXPECT_NO_THROW(
       Utilities::Log::Logger::GetInstance().RegisterModule("Module_Library"));
+
+  // Expect warning message when register moldule with an empty name or contain
+  // whitespace tab and newline
+  Utilities::Log::Logger::GetInstance().RegisterModule("");
+  Utilities::Log::Logger::GetInstance().RegisterModule("         ");
+  Utilities::Log::Logger::GetInstance().RegisterModule("\n");
+  Utilities::Log::Logger::GetInstance().RegisterModule("\t");
+  Utilities::Log::Logger::GetInstance().RegisterModule("      \t    \n");
+
+  std::stringstream lLogFilePath{};
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 5);
+  CheckWrittenData(lLogFilePath.str(), "Module Name can not be an empty string "
+                                       "or contain whitespace,tab,newline");
 }
 
 TEST_F(LoggerTest, LogsFilesCreated) {
@@ -123,7 +126,9 @@ TEST_F(LoggerTest, LogsFilesCreated) {
   // Expect Logs/Module_Library_{CurrentDate}.txt  for module_library
   // component created
   std::stringstream lLogFilePath{};
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   EXPECT_TRUE(std::filesystem::exists(lLogFilePath.str()));
 
   // Write trace message for  LOGGER component
@@ -134,7 +139,9 @@ TEST_F(LoggerTest, LogsFilesCreated) {
   // Expect Logs/LOGGER_{CurrentDate}.txt  for LOGGER component
   // created
   lLogFilePath.str("");
-  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   EXPECT_TRUE(std::filesystem::exists(lLogFilePath.str()));
 
   // Write trace message for  unRegistred_Module_Library  component
@@ -144,9 +151,21 @@ TEST_F(LoggerTest, LogsFilesCreated) {
   // Expect Logs/unRegistred_Module_Library_{CurrentDate}.txt  for
   // unRegistred_Module_Library component not created
   lLogFilePath.str("");
-  lLogFilePath << "Logs/unRegistred_Module_Library_" << CurrentDateToString()
+  lLogFilePath << "Logs/unRegistred_Module_Library/unRegistred_Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
                << ".txt";
   EXPECT_FALSE(std::filesystem::exists(lLogFilePath.str()));
+
+  // Expect warning log message created for trying to use
+  // unRegistred_Module_Library
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 1);
+  CheckWrittenData(
+      lLogFilePath.str(),
+      "Unable to write Log : Module unRegistred_Module_Library not registred");
 }
 
 TEST_F(LoggerTest, Trace) {
@@ -158,12 +177,16 @@ TEST_F(LoggerTest, Trace) {
   Utilities::Log::Logger::GetInstance().Trace("Module_Library", lLogMsg);
 
   // Expect only 1 trace log
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [trace]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 
   lLogFilePath.str("");
-  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
 
   // Write trace message for  LOGGER component
   lLogMsg = "Trace log message number 1-one";
@@ -191,7 +214,9 @@ TEST_F(LoggerTest, Debug) {
 
   // Expect only 1 Debug log
   std::stringstream lLogFilePath{};
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [debug]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 
@@ -201,7 +226,9 @@ TEST_F(LoggerTest, Debug) {
 
   // Expect only 2 debug logs
   lLogFilePath.str("");
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [debug]", 2);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 }
@@ -213,7 +240,9 @@ TEST_F(LoggerTest, Info) {
 
   // Expect only 1 Info log
   std::stringstream lLogFilePath{};
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [info]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 
@@ -223,7 +252,9 @@ TEST_F(LoggerTest, Info) {
 
   // Expect only 2 Info logs
   lLogFilePath.str("");
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [info]", 2);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 }
@@ -235,7 +266,9 @@ TEST_F(LoggerTest, Warning) {
 
   // Expect only 1 Warning log
   std::stringstream lLogFilePath{};
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [warning]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 
@@ -245,7 +278,9 @@ TEST_F(LoggerTest, Warning) {
 
   // Expect only 2 Warning logs
   lLogFilePath.str("");
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [warning]", 2);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 }
@@ -258,7 +293,9 @@ TEST_F(LoggerTest, Error) {
 
   // Expect only 1 Error log
   std::stringstream lLogFilePath{};
-  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 
@@ -269,7 +306,9 @@ TEST_F(LoggerTest, Error) {
 
   // Expect only 2 Error logs
   lLogFilePath.str("");
-  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 2);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 }
@@ -281,7 +320,9 @@ TEST_F(LoggerTest, critical) {
 
   // Expect only 1 critical log
   std::stringstream lLogFilePath{};
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [critical]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 
@@ -291,7 +332,9 @@ TEST_F(LoggerTest, critical) {
 
   // Expect only 2 critical logs
   lLogFilePath.str("");
-  lLogFilePath << "Logs/Module_Library_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [critical]", 2);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 }
@@ -315,7 +358,9 @@ TEST_F(LoggerTest, ChangeLogLevel) {
 
   // Expect only 3 trace logs
   std::stringstream lLogFilePath{};
-  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [trace]", 3);
 
   // Change log level to info level
@@ -344,7 +389,9 @@ TEST_F(LoggerTest, LogLevelunRegistredModule) {
   std::stringstream lLogFilePath{};
   std::string lLogMsg = "Unable to set level : Module "
                         "unRegistred_Module_Library is not registred";
-  lLogFilePath << "Logs/LOGGER_" << CurrentDateToString() << ".txt";
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
   CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [error]", 1);
   EXPECT_TRUE(CheckWrittenData(lLogFilePath.str(), lLogMsg));
 }
@@ -389,4 +436,69 @@ TEST_F(LoggerTest, ShutDown) {
 
   EXPECT_EQ(nullptr,
             spdlog::get(std::string(Utilities::Constants::c_LoggerModuleName)));
+}
+
+TEST_F(LoggerTest, CurrentDateToString) {
+  std::regex lRegExpr(R"((\d{4})-(\d{2})-(\d{2}))");
+  EXPECT_TRUE(std::regex_search(
+      Utilities::Log::Logger::GetInstance().CurrentDateToString(), lRegExpr));
+}
+
+TEST_F(LoggerTest, DeleteAllLogs) {
+
+  std::stringstream lLogFilePath{};
+
+  // Write log for LOGGER module
+  std::string lLogMsg = "Trace log message about LOGGER_Module";
+  Utilities::Log::Logger::GetInstance().Trace(
+      std::string(Utilities::Constants::c_LoggerModuleName), lLogMsg);
+
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [trace]", 1);
+
+  // Write log for Module_Library
+  lLogMsg = "Critical log message about Module_Library";
+  Utilities::Log::Logger::GetInstance().Critical("Module_Library", lLogMsg);
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/Module_Library/Module_Library_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [critical]", 1);
+
+  // Create fake previous logs files
+  std::string lLoggerPreviousLogFilePath{"Logs/LOGGER/LOGGER_1313_01_13.txt"};
+  std::string lModuleLibraryPreviousLogFilePath{
+      "Logs/Module_Library/Module_Library_1313_01_13.txt"};
+  std::ofstream lLOGGERPreviousLogFile(lLoggerPreviousLogFilePath);
+  std::ofstream lModuleLibraryPreviousLogFile(
+      lModuleLibraryPreviousLogFilePath);
+
+  lLOGGERPreviousLogFile << "Very ancient log" << std::endl;
+  lModuleLibraryPreviousLogFile << "Very ancient log" << std::endl;
+
+  lModuleLibraryPreviousLogFile.close();
+  lLOGGERPreviousLogFile.close();
+
+  // Delete all logs
+  Utilities::Log::Logger::GetInstance().DeleteAllLogs();
+
+  // Expect no logs present / Logs files for Module_Library is empty
+  CheckLogsStructure(lLogFilePath.str(), "[Module_Library] [critical]", 0);
+  EXPECT_TRUE(
+      std::filesystem::is_empty(std::filesystem::path(lLogFilePath.str())));
+
+  // Expect no logs present / Logs files for LOGGER is empty
+  lLogFilePath.str("");
+  lLogFilePath << "Logs/LOGGER/LOGGER_"
+               << Utilities::Log::Logger::GetInstance().CurrentDateToString()
+               << ".txt";
+  CheckLogsStructure(lLogFilePath.str(), "[LOGGER] [trace]", 0);
+  EXPECT_TRUE(
+      std::filesystem::is_empty(std::filesystem::path(lLogFilePath.str())));
+
+  // Expect Previous logs files have been deleted
+  EXPECT_FALSE(std::filesystem::exists(lLoggerPreviousLogFilePath));
+  EXPECT_FALSE(std::filesystem::exists(lModuleLibraryPreviousLogFilePath));
 }

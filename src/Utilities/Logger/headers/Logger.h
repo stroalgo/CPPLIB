@@ -15,7 +15,6 @@
 #include "Constants.h"
 #include "GenericSingleton.h"
 
-
 #include <map>
 #include <memory>
 #include <spdlog/common.h>
@@ -53,6 +52,7 @@ public:
    *
    * @param pModuleName Name of the module or library to register
    */
+  // TODO : Use setting module to load logs folder path and logger default level
   void RegisterModule(const std::string &pModuleName);
 
   /**
@@ -78,6 +78,20 @@ public:
    * @return A map  containing module as key and level as value
    */
   const std::map<std::string, std::string> GetLogLevels();
+
+  /**
+   * @brief Delete all logs for all registered module
+   *
+   */
+  void DeleteAllLogs();
+
+  /**
+   * @brief Get Current date as string in a "yyyy-mm-dd" format
+   *
+   * @return std::string Date as string
+   */
+  // TODO :  will moved in common modules if needed in many place
+  std::string CurrentDateToString();
 
   /**
    * @brief Write a trace message
@@ -218,7 +232,7 @@ private:
       }
     } else {
 
-      HandleWriteFailure("Unable to write Log : Module {} does not exist",
+      HandleWriteFailure("Unable to write Log : Module {} not registred",
                          pModuleName);
     }
   }

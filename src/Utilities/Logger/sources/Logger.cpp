@@ -7,6 +7,11 @@
 #include "Logger.h"
 
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <filesystem>
+#include <fstream>
+#include <list>
 #include <memory>
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -21,7 +26,13 @@ Logger::Logger() {
 
 void Logger::RegisterModule(const std::string &pModuleName) {
 
-  if (spdlog::get(pModuleName) == nullptr) {
+  std::string lModuleName = pModuleName;
+  boost::algorithm::trim(lModuleName);
+  if (lModuleName.empty()) {
+    HandleWriteFailure("Module Name can not be an empty string or contain "
+                       "whitespace,tab,newline",
+                       std::string(Utilities::Constants::c_LoggerModuleName));
+  } else if (spdlog::get(pModuleName) == nullptr) {
 
     // Console LOG
     auto lConsole_sink =
@@ -30,6 +41,7 @@ void Logger::RegisterModule(const std::string &pModuleName) {
 
     // File LOG.txt
     std::string lFilename_txt_path{std::string("Logs/") + pModuleName +
+                                   std::string("/") + pModuleName +
                                    std::string(".txt")};
     // Create a new Log file at 00:00 and delete it after 31 days
     auto lFile_txt_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(
@@ -38,12 +50,13 @@ void Logger::RegisterModule(const std::string &pModuleName) {
 
     // File LOG.json
     std::string lFilename_json_path{std::string("Logs/") + pModuleName +
+                                    std::string("/") + pModuleName +
                                     std::string(".json")};
     // Create a new Log file at 00:00 and delete it after 31 days
     auto lFile_json_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(
         lFilename_json_path, 00, 00, false, 31);
     lFile_json_sink->set_pattern(
-        "{\"time\": \"%Y-%m-%dT%H:%M:%S.%f%z\", \"name\": \"%n\", \"level\": "
+        "{\"time\": \"%Y-%m-%d %H:%M:%S.%f%z\", \"name\": \"%n\", \"level\": "
         "\"%^%l%$\", \"process\": %P, \"thread\": %t, \"message\": \"%v\"},");
 
     spdlog::sinks_init_list lSink_list{lConsole_sink, lFile_txt_sink,
@@ -155,6 +168,54 @@ const std::map<std::string, std::string> Logger::GetLogLevels() {
 void Logger::ShutDown() {
   spdlog::drop_all();
   spdlog::shutdown();
+}
+
+void Logger::DeleteAllLogs() {
+  std::for_each(
+      m_Loggers->cbegin(), m_Loggers->cend(), [this](const auto &pLogger) {
+        std::list<std::string> lListOfPath{};
+        for (const auto &lFilePath :
+             std::filesystem::directory_iterator{"Logs/" + pLogger.first}) {
+          lListOfPath.push_back(lFilePath.path().string());
+        }
+
+        // Clear the content of current used logfile
+        std::stringstream lLogFilePath{};
+        lLogFilePath << "Logs/" << pLogger.first << "/" << pLogger.first << "_"
+                     << CurrentDateToString() << ".txt";
+        lListOfPath.remove(lLogFilePath.str());
+        std::fstream lFileStreamTxt{};
+        lFileStreamTxt.open(lLogFilePath.str(),
+                            std::ofstream::out | std::ofstream::trunc);
+        lFileStreamTxt.close();
+        lLogFilePath.str("");
+        lLogFilePath << "Logs/" << pLogger.first << "/" << pLogger.first << "_"
+                     << CurrentDateToString() << ".json";
+        lListOfPath.remove(lLogFilePath.str());
+        std::fstream lFileStreamJson{};
+        lFileStreamJson.open(lLogFilePath.str(),
+                             std::ofstream::out | std::ofstream::trunc);
+        lFileStreamJson.close();
+
+        // Delete all logs files exept the current log file
+        for (const auto &lFilePath : lListOfPath) {
+          std::filesystem::remove(lFilePath);
+        }
+      });
+}
+
+std::string Logger::CurrentDateToString() {
+  using namespace boost::gregorian;
+
+  // Get the current date
+  date d = day_clock::local_day();
+  std::unique_ptr<date_facet> df = std::make_unique<date_facet>("%Y-%m-%d");
+
+  // Apply format
+  std::stringstream ss;
+  ss.imbue(std::locale{ss.getloc(), df.get()});
+  ss << d;
+  return ss.str();
 }
 
 } // namespace Utilities::Log
