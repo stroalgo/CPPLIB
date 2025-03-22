@@ -20,13 +20,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                 -ftracer
                 -fstdarg-opt
                 -fstack-clash-protection
-                
+
 
                 #### Available in GNU plateform
                 #-fprofile-use
                 #-fsection-anchors
         )
-        message("GCC RELEASE options Flags added")
+        message("🟢 GCC RELEASE options Flags added")
         
 elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")        
         add_compile_options(
@@ -44,7 +44,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
                 # -Q  N.B: Build is too long
                 
         )
-        message("GCC RELEASE WITH DEBUG INFO options Flags added")
+        message("🟢 GCC RELEASE WITH DEBUG INFO options Flags added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
@@ -77,7 +77,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
                 #-pg
                 #-p
         )
-        message("GCC DEBUG options Flags added")
+        message("🟢 GCC DEBUG options Flags added")
 endif()       
         
 #---------------------------------------------------------Compile Link options--------------------------------------------------------
