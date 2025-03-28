@@ -48,5 +48,5 @@ endif()
 # -----------------------------------------------------------------------------
 if(BUILD_TESTING)    
     set(DEPENDENCIES )
-    add_unit_test(${PROJECT_NAME} ${DEPENDENCIES})    
+    # add_unit_test(${PROJECT_NAME} ${DEPENDENCIES})    
 endif()

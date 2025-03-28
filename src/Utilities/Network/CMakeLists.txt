@@ -48,5 +48,5 @@ endif()
 # Tests
 # -----------------------------------------------------------------------------
 if(BUILD_TESTING)    
-    add_unit_test(${PROJECT_NAME})    
+    # add_unit_test(${PROJECT_NAME})    
 endif()

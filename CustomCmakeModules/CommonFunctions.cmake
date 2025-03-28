@@ -173,8 +173,10 @@ function(add_unit_test NAME )
     )      
 
     # Add code coverage link libraries
-    target_compile_options( ${NAME}_test PRIVATE -coverage  -fprofile-arcs -ftest-coverage)
-    target_link_options( ${NAME}_test PRIVATE -coverage -lgcov)
+    if(IS_LINUX)
+        target_compile_options( ${NAME}_test PRIVATE -coverage  -fprofile-arcs -ftest-coverage)
+        target_link_options( ${NAME}_test PRIVATE -coverage -lgcov)
+    endif()
 
     # Automatically add tests with CTest
     gtest_discover_tests(
