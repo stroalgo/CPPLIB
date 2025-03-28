@@ -166,10 +166,10 @@ pipeline {
               agent { label 'Physical-Agent-Windows'}
               steps {
                 bat 'echo "Running Unit Tests..."'   
-                bat 'ctest -V --build-config %BuildType% --test-dir build/%BuildType% --output-junit  unitTestReports.xml'     
+                bat 'ctest -V --build-config %BuildType% --test-dir build --output-junit  unitTestReports.xml'     
             
                 bat 'echo "Running Coverage Tests..."'
-                bat 'ctest -V -T Coverage --test-dir build/%BuildType%'
+                bat 'ctest -V -T Coverage --test-dir build'
                 bat 'gcovr -r build/%BuildType% --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
               }
               post {
