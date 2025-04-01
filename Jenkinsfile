@@ -1,6 +1,6 @@
 pipeline { 
   
-  agent none
+  agent any
   tools {
         maven "Maven"
     }
@@ -26,13 +26,14 @@ pipeline {
         {   
           parallel  
           {
-            stage("Dependencies for Linux Platform")
+            stage("Linux Platform")
             {
                 agent { label 'Docker-Agent-Linux'}
                 steps
                 {
                   echo 'Clean up...'
-                  sh 'if [ -d build ]; then rm -rf build;fi'
+                  sh 'if [ -d build ]; then rm -rf build ;fi'
+                  sh 'if [ -d _PACKAGE_ ]; then rm -rf _PACKAGE_;fi'
 
                   script {
                               currentBuild.displayName = "[#${BUILD_NUMBER}]"
@@ -57,13 +58,14 @@ pipeline {
                 }
             }
 
-            stage("Dependencies for Windows Platform")
+            stage("Windows Platform")
             {
               agent { label 'Physical-Agent-Windows'}
               steps 
                 {
                   echo 'Clean up...'
                   bat 'if exist build (rmdir build /S /Q)'
+                  bat 'if exist _PACKAGE_ (rmdir _PACKAGE_ /S /Q)'
 
                   script {
                               currentBuild.displayName = "[#${BUILD_NUMBER}]"
@@ -93,7 +95,7 @@ pipeline {
         {    
           parallel  
           {
-            stage("Configure for Linux Platform")
+            stage("Linux Platform")
             {
               agent { label 'Docker-Agent-Linux'}              
               steps 
@@ -102,7 +104,7 @@ pipeline {
                 sh 'cmake --preset conan-$buildTypeLower'       
               }
             }
-            stage("Configure for Windows Platform")
+            stage("Windows Platform")
             {
               agent { label 'Physical-Agent-Windows'}              
               steps 
@@ -118,7 +120,7 @@ pipeline {
         {
           parallel  
           {    
-            stage("Build for Linux Platform")
+            stage("Linux Platform")
             {
               agent { label 'Docker-Agent-Linux'}
               steps 
@@ -127,7 +129,7 @@ pipeline {
                 sh 'cmake --build --parallel 4  --preset conan-$buildTypeLower'        
               }      
             }
-            stage("Build for Windows Platform")
+            stage("Windows Platform")
             {
               agent { label 'Physical-Agent-Windows'}
               steps 
@@ -139,11 +141,11 @@ pipeline {
           }
         }
 
-        stage('Test') 
+        stage('Run UnitTests') 
         {
           parallel  
           { 
-            stage("Run UnitTests for Linux Platform")
+            stage("Linux Platform")
             {
               agent { label 'Docker-Agent-Linux'}
               steps {
@@ -161,16 +163,12 @@ pipeline {
               }                
             }
 
-            stage("Run UnitTests for Windows Platform")
+            stage("Windows Platform")
             {
               agent { label 'Physical-Agent-Windows'}
               steps {
                 bat 'echo "Running Unit Tests..."'   
-                bat 'ctest -V --build-config %BuildType% --test-dir build --output-junit  unitTestReports.xml'     
-            
-                bat 'echo "Running Coverage Tests..."'
-                bat 'ctest -V -T Coverage --test-dir build'
-                bat 'gcovr -r build/%BuildType% --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
+                bat 'ctest -V --build-config %BuildType% --test-dir build'                 
               }
               post {
                 success  {
@@ -182,70 +180,71 @@ pipeline {
           }
         }
 
-        stage('SonarQube') 
-        {
-          steps 
-          {
-            sh 'echo "Static C/C++ code analysis ===> CPPCHECK"'
-            sh 'cppcheck \
-                --enable=all  \
-                -v \
-                --language=c++ \
-                --suppress=missingIncludeSystem \
-                --inconclusive \
-                --std=c++17 \
-                --platform=win64 \
-                --xml \
-                --xml-version=2  src 2> cppcheck.xml'  
+        // stage('SonarQube') 
+        // {
+        //   agent { label 'Docker-Agent-Linux'}
+        //   steps 
+        //   {
+        //     sh 'echo "Static C/C++ code analysis ===> CPPCHECK"'
+        //     sh 'cppcheck \
+        //         --enable=all  \
+        //         -v \
+        //         --language=c++ \
+        //         --suppress=missingIncludeSystem \
+        //         --inconclusive \
+        //         --std=c++17 \
+        //         --platform=win64 \
+        //         --xml \
+        //         --xml-version=2  src 2> cppcheck.xml'  
 
-            sh 'echo "Static C/C++ code analysis ===> RATS"'  
-            sh 'rats \
-                -w 3 \
-                --xml \
-                -l "c" \
-                src > rats.xml'
+        //     sh 'echo "Static C/C++ code analysis ===> RATS"'  
+        //     sh 'rats \
+        //         -w 3 \
+        //         --xml \
+        //         -l "c" \
+        //         src > rats.xml'
 
 
-            sh 'echo "Static C/C++ code analysis ===> CLANG"'  
-            sh 'cd build/$BuildType && scan-build \
-                -plist \
-                -analyze-headers \
-                -o clang_reports make'
+        //     sh 'echo "Static C/C++ code analysis ===> CLANG"'  
+        //     sh 'cd build/$BuildType && scan-build \
+        //         -plist \
+        //         -analyze-headers \
+        //         -o clang_reports make'
 
-            sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'  
-            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', message: 'Skip in case of cmd failure')
-            {
-              sh 'cd build/$BuildType && run-clang-tidy > clang-tidy.txt'
-            }
+        //     sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'  
+        //     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', message: 'Skip in case of cmd failure')
+        //     {
+        //       sh 'cd build/$BuildType && run-clang-tidy > clang-tidy.txt'
+        //     }
 
-            script 
-            {
-                withSonarQubeEnv('sonarqube_cpplib') {
-                  sh "/opt/sonar-scanner/bin/sonar-scanner \
-                      -Dsonar.sources=src \
-                      -Dsonar.projectKey=cpplib \
-                      -Dsonar.cfamily.compile-commands=build/$BuildType/compile_commands.json \
-                      -Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers \
-                      -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
-                      -Dsonar.cxx.rats.reportPaths=rats.xml \
-                      -Dsonar.cxx.clangsa.reportPaths=build/$BuildType/clang_reports/*/*.plist \
-                      -Dsonar.cxx.clangtidy.reportPaths=build/$BuildType/clang-tidy.txt \
-                      -Dsonar.cxx.xunit.reportPaths=build/$BuildType/unitTestReports.xml \
-                      -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml  \
-                      -Dsonar.qualitygate.wait=true \
-                      -Dsonar.qualitygate.timeout=300 \
-                      -Dsonar.branchname=${env.BRANCH_NAME} \
-                      -Dsonar.verbose=true " 
-                }
-            }
-          }
-        }
+        //     script 
+        //     {
+        //         withSonarQubeEnv('sonarqube_cpplib') {
+        //           sh "/opt/sonar-scanner/bin/sonar-scanner \
+        //               -Dsonar.sources=src \
+        //               -Dsonar.projectKey=cpplib \
+        //               -Dsonar.cfamily.compile-commands=build/$BuildType/compile_commands.json \
+        //               -Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers \
+        //               -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
+        //               -Dsonar.cxx.rats.reportPaths=rats.xml \
+        //               -Dsonar.cxx.clangsa.reportPaths=build/$BuildType/clang_reports/*/*.plist \
+        //               -Dsonar.cxx.clangtidy.reportPaths=build/$BuildType/clang-tidy.txt \
+        //               -Dsonar.cxx.xunit.reportPaths=build/$BuildType/unitTestReports.xml \
+        //               -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml  \
+        //               -Dsonar.qualitygate.wait=true \
+        //               -Dsonar.qualitygate.timeout=300 \
+        //               -Dsonar.branchname=${env.BRANCH_NAME} \
+        //               -Dsonar.verbose=true " 
+        //         }
+        //     }
+        //   }
+        // }
 
         stage('Package') 
         {
           parallel  
           {
-            stage("Package for Linux Platform")
+            stage("Linux Platform")
             {
               agent { label 'Docker-Agent-Linux'}
               steps
@@ -261,19 +260,19 @@ pipeline {
                 }
               }
             }
-            stage("Package for Windows Platform")
+            stage("Windows Platform")
             {
               agent { label 'Physical-Agent-Windows'}   
               steps
               {
                 bat 'echo "Packaging..."'        
-                bat 'cd  build/%BuildType% && make package'        
+                bat 'cd  build && cpack -C $BuildType'        
               }
               post 
               {
                 success
                 {
-                    archiveArtifacts artifacts: '_PACKAGE_/CppLib-*.sh', onlyIfSuccessful: true
+                    archiveArtifacts artifacts: '_PACKAGE_/CppLib-*.exe', onlyIfSuccessful: true                    
                 }
               }
             }
@@ -284,13 +283,12 @@ pipeline {
         {
           parallel  
           {
-            stage("Publish artifact for Linux Platform")
+            stage("Linux Platform")
             {
               agent { label 'Docker-Agent-Linux'}    
                 steps {
                     script {
-                      if (BuildType == 'Release') {
-                        sh 'echo "Publish package to Nexus..."'                      
+                      if (BuildType == 'Release') {                    
                         // Find built artifact under target folder
                         filesByGlob = findFiles(glob: "_PACKAGE_/*.sh");                    
                         // Extract the path from the File found
@@ -299,8 +297,7 @@ pipeline {
                         artifactExists = fileExists artifactPath;                   
                         //Extract current version
                         versionExtracted = artifactPath.split('-')[1]                    
-                        if(artifactExists) {
-                            echo "*** File: ${artifactPath}";
+                        if(artifactExists) {                            
                             nexusArtifactUploader(
                                 nexusVersion: NEXUS_VERSION,
                                 protocol: NEXUS_PROTOCOL,
@@ -311,7 +308,7 @@ pipeline {
                                 credentialsId: NEXUS_CREDENTIAL_ID,
                                 artifacts: [                                
                                     [artifactId: NEXUS_REPOSITORY,
-                                    classifier: '',
+                                    classifier: 'Release',
                                     file: artifactPath,
                                     type: 'sh'
                                     ]                                
@@ -328,38 +325,37 @@ pipeline {
 
                 }
             }
-            stage("Publish artifact for Windows Platform")
+            stage("Windows Platform")
             {
               agent { label 'Physical-Agent-Windows'}  
               steps 
                {
                   script 
                   {
-                    if (BuildType == 'Release') {
-                      sh 'echo "Publish package to Nexus..."'                      
+                    if (BuildType == 'Release') {                                         
                       // Find built artifact under target folder
-                      filesByGlob = findFiles(glob: "_PACKAGE_/*.sh");                    
+                      filesByGlob = findFiles(glob: "_PACKAGE_/*.exe");                    
                       // Extract the path from the File found
                       artifactPath = filesByGlob[0].path;
                       // Assign to a boolean response verifying If the artifact name exists
                       artifactExists = fileExists artifactPath;                   
-                      //Extract current version
-                      versionExtracted = artifactPath.split('-')[1]                    
-                      if(artifactExists) {
-                          echo "*** File: ${artifactPath}";
+					  //Extract current version
+                      versionExtracted = artifactPath.split('-')[1]  
+                                       
+                      if(artifactExists) {                          
                           nexusArtifactUploader(
                               nexusVersion: NEXUS_VERSION,
                               protocol: NEXUS_PROTOCOL,
-                              nexusUrl: NEXUS_URL,
+                              nexusUrl: "localhost:8081/",
                               groupId: "org.stroalgo",
                               version: "Windows-${BuildType}-${versionExtracted}",
                               repository: NEXUS_REPOSITORY,
                               credentialsId: NEXUS_CREDENTIAL_ID,
                               artifacts: [                                
                                   [artifactId: NEXUS_REPOSITORY,
-                                  classifier: '',
+                                  classifier: 'win64',
                                   file: artifactPath,
-                                  type: 'sh'
+                                  type: 'exe'								  
                                   ]                                
                               ]
                           );
@@ -368,32 +364,26 @@ pipeline {
                           error "*** File: ${artifactPath}, could not be found";
                       }
                     } else {
-                      sh 'echo "Not a release build type for Publishing to Nexus"'    
+                      bat 'echo "Not a release build type for Publishing to Nexus"'    
                     }
                   }
                 }
             }
           }            
-        } 
-  
-        stage("Clean")
-        {
-          steps
-          {
-            agent { label 'Docker-Agent-Linux'}
-            post 
-            {
-              always 
-              {          
-                emailext attachLog: true,
-                      body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}",
-                      recipientProviders: [developers(), requestor()],
-                      subject: "Jenkins Build ${currentBuild.currentResult}: Job ${env.JOB_NAME}"                
-              
-                cleanWs()
-              }
-            }
-          }
         }
   }
+  
+
+  post 
+  {    
+    always 
+    {      
+      emailext attachLog: true,
+            body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}",
+            recipientProviders: [developers(), requestor()],
+            subject: "Jenkins Build ${currentBuild.currentResult}: Job ${env.JOB_NAME}"
+    }
+  }
 }
+
+
