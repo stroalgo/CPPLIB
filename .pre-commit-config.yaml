@@ -1,0 +1,85 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+fail_fast: false
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    #a handful of language-agnostic hooks which are universally useful
+
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+  - repo: https://github.com/pocc/pre-commit-hooks
+    #C/C++ code formatters and  static code analyzers
+
+    rev: v1.3.5
+    hooks:
+      - id: clang-format
+      - id: clang-tidy
+      - id: uncrustify
+      - id: cppcheck
+      - id: cpplint
+  - repo: https://github.com/hhatto/autopep8
+    #autopep8 automatically formats Python code to conform to the PEP 8 style guide
+
+    rev: v2.3.2
+    hooks:
+      - id: autopep8
+  - repo: https://github.com/petalmd/dockerfile-pre-commit
+    #Run hadolint a smarter Dockerfile linter
+
+    rev: v1.0
+    hooks:
+      - id: dockerlint
+  - repo: https://github.com/gitleaks/gitleaks
+    #A tool for detecting sensitive data in git repos,
+
+    #files, and whatever else you wanna throw at it via stdin
+    rev: v8.23.1
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/thoughtworks/talisman
+    #Talisman is a tool that scans git changesets to ensure that potential secrets or
+
+    #sensitive information do not leave the developer's workstation.
+    rev: "v1.33.1"
+    hooks:
+      - id: talisman-commit
+  - repo: https://github.com/crate-ci/typos
+    #Finds and corrects spelling mistakes among source code
+
+    rev: v1.31.1
+    hooks:
+      - id: typos
+  - repo: https://github.com/google/yamlfmt
+    #a formatter for yaml files
+
+    rev: v0.16.0
+    hooks:
+      - id: yamlfmt
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    # runs shellcheck on your scripts
+
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+  - repo: https://github.com/psf/black
+    #Black is the uncompromising Python code formatter.
+
+    rev: 25.1.0
+    hooks:
+      - id: black
+  - repo: https://github.com/PyCQA/isort
+    #isort is a Python utility / library to sort imports alphabetically and automatically
+
+    rev: 6.0.1
+    hooks:
+      - id: isort
+  - repo: https://github.com/PyCQA/flake8
+    #a linter framework for python
+
+    rev: 7.2.0
+    hooks:
+      - id: flake8
