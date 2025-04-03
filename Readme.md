@@ -1,4 +1,4 @@
-# Foobar
+# CPPLIB
 
 CPPLIB is c++ library
 ## Installation
