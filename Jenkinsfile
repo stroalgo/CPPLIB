@@ -91,6 +91,9 @@ pipeline {
                             if (env.CHANGE_ID) {
                                   BuildType = "Debug"
                                }
+
+
+                               bat 'echo "--------------------------%BuildType%"'
                               if (BuildType == 'RelWithDebInfo') {
                                 bat 'conan install .  --build=missing  -s "&:build_type=%BuildType%" -sbuild_type=Release'
                               }
