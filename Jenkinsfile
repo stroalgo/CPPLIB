@@ -130,17 +130,17 @@ pipeline {
                   echo "Loading..."
                   script {
 
-                                  bat 'echo --------------------------%env.CHANGE_ID%'
-                                  bat 'echo --------------------------%params.BuildType%'
+                                  bat 'echo --------------------------${env.CHANGE_ID}'
+                                  bat 'echo -------------------------- ${params.BuildType}'
                             if (env.CHANGE_ID) {
                                   BuildType = "Debug"
                                   bat 'echo "--------------------------pull request"'
                                }
 
 
-                               bat 'echo "--------------------------%BuildType%"'
+
                               if (BuildType == 'RelWithDebInfo') {
-                                bat 'conan install .  --build=missing  -s "&:build_type=%params.BuildType%" -sbuild_type=Release'
+                                bat """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
                               }
                               else {
                                 bat 'conan install . -sbuild_type=%BuildType% --build=missing'
