@@ -88,10 +88,11 @@ pipeline {
                   echo "Loading..."
                   script {
 
+                                  bat 'echo "--------------------------%env.CHANGE_ID%"'
+                                  bat 'echo "--------------------------%params.BuildType%"'
                             if (env.CHANGE_ID) {
                                   BuildType = "Debug"
                                   bat 'echo "--------------------------pull request"'
-                                  bat 'echo "--------------------------%env.CHANGE_ID%"'
                                }
 
 
