@@ -9,6 +9,8 @@ For linux :
 ./Cpplib-x.x.x-Linux.sh
 ```
 
+For Windows
+
 ## Usage
 
 Under dev..
