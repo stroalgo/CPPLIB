@@ -157,10 +157,10 @@ pipeline {
               agent { label 'Docker-Agent-Linux'}
               steps {
                 sh 'echo "Running Unit Tests..."'
-                sh 'ctest -V --build-config $BuildType --test-dir build/$BuildType --output-junit  unitTestReports.xml'
+                sh """ctest -V --build-config ${params.BuildType} --test-dir build/${params.BuildType} --output-junit  unitTestReports.xml"""
 
                 sh 'echo "Running Coverage Tests..."'
-                sh 'ctest -V -T Coverage --test-dir build/$BuildType'
+                sh """ctest -V -T Coverage --test-dir build/${params.BuildType}"""
                 sh 'gcovr -r build/$BuildType --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'
               }
               post {
@@ -175,7 +175,7 @@ pipeline {
               agent { label 'Physical-Agent-Windows'}
               steps {
                 bat 'echo "Running Unit Tests..."'
-                bat 'ctest -V --build-config %BuildType% --test-dir build'
+                bat """ctest -V --build-config ${params.BuildType} --test-dir build"""
               }
               post {
                 success  {
