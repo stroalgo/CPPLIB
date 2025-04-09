@@ -24,6 +24,24 @@ pipeline {
   {
         stage('Load Dependencies')
         {
+
+            stage('PR Stage') {
+            when {
+                changeRequest()
+            }
+            steps {
+                echo "This stage only runs for pull requests"
+            }
+        }
+
+        stage('Non-PR Stage') {
+            when {
+                not { changeRequest() }
+            }
+            steps {
+                echo "This stage only runs for non-PR builds"
+            }
+        }
           parallel
           {
             stage("Linux Platform")
