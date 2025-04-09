@@ -90,6 +90,8 @@ pipeline {
 
                             if (env.CHANGE_ID) {
                                   BuildType = "Debug"
+                                  bat 'echo "--------------------------pull request"'
+                                  bat 'echo "--------------------------%env.CHANGE_ID%"'
                                }
 
 
