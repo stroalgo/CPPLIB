@@ -73,8 +73,6 @@ pipeline {
                 agent { label 'Docker-Agent-Linux'}
                 steps
                 {
-                   echo "PR Number: ${env.GITHUB_PR_NUMBER}"
-                  echo "Event: ${env.GITHUB_EVENT_NAME }"
                   echo 'Clean up...'
                   sh 'if [ -d build ]; then rm -rf build ;fi'
                   sh 'if [ -d _PACKAGE_ ]; then rm -rf _PACKAGE_;fi'
@@ -96,10 +94,10 @@ pipeline {
                   sh 'echo "Loading..."'
                   script {
                               if (BuildType == 'RelWithDebInfo') {
-                                sh 'conan install .  --build=missing  -s "&:build_type=$BuildType" -sbuild_type=Release'
+                                sh """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
                               }
                               else {
-                                sh 'conan install . -sbuild_type=$BuildType --build=missing'
+                                sh """conan install . -sbuild_type=${params.BuildType} --build=missing"""
                               }
                           }
 
