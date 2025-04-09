@@ -161,7 +161,7 @@ pipeline {
 
                 sh 'echo "Running Coverage Tests..."'
                 sh """ctest -V -T Coverage --test-dir build/${params.BuildType}"""
-                sh 'gcovr -r build/$BuildType --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'
+                sh """gcovr -r build/${params.BuildType} --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml"""
               }
               post {
                 success  {
@@ -257,7 +257,7 @@ pipeline {
               steps
               {
                 sh 'echo "Packaging..."'
-                sh 'cd  build/$BuildType && make package'
+                sh """cd  build/${params.BuildType} && make package"""
               }
               post
               {
@@ -295,7 +295,7 @@ pipeline {
               agent { label 'Docker-Agent-Linux'}
                 steps {
                     script {
-                      if (BuildType == 'Release') {
+                      if (params.BuildType == 'Release') {
                         // Find built artifact under target folder
                         filesByGlob = findFiles(glob: "_PACKAGE_/*.sh");
                         // Extract the path from the File found
@@ -339,7 +339,7 @@ pipeline {
                {
                   script
                   {
-                    if (BuildType == 'Release') {
+                    if (params.BuildType == 'Release') {
                       // Find built artifact under target folder
                       filesByGlob = findFiles(glob: "_PACKAGE_/*.exe");
                       // Extract the path from the File found
