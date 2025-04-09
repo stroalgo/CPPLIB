@@ -42,6 +42,10 @@ pipeline {
                               currentBuild.description = "Build Type: ${params.BuildType}\n"  +
                                                         "Branch Name: ${env.BRANCH_NAME}\n" +
                                                         "Executed on: ${NODE_NAME}\n"
+
+                               if (env.CHANGE_ID) {
+                                  params.BuildType = "Debug"
+                               }
                           }
 
                   sh 'echo "create conan profile..."'
