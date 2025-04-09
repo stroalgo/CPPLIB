@@ -22,8 +22,7 @@ pipeline {
 
   stages
   {
-    stage('Load Dependencies')
-        {
+
 
             stage('PR Stage') {
             when {
@@ -42,6 +41,29 @@ pipeline {
                 echo "This stage only runs for non-PR builds"
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         stage('Load Dependencies')
         {
           parallel
