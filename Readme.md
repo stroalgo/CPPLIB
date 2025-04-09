@@ -1,4 +1,4 @@
-# Foobar
+hg# Foobar
 
 CPPLIB is c++ library
 ## Installation
@@ -15,7 +15,7 @@ Under dev..
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first
+Pull requests are welcome. For major changes, please open an issue firstgghg
 to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
