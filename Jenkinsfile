@@ -1,5 +1,5 @@
-pipeline { 
-  
+pipeline {
+
   agent any
   tools {
         maven "Maven"
@@ -7,10 +7,11 @@ pipeline {
 
   parameters{
       choice(name:'BuildType', choices:'Debug\nRelease\nRelWithDebInfo',description:'Which type of build to consider?'
+       // The FIRST item in the choices array becomes the default
           )
   }
 
-  environment 
+  environment
   {
               buildTypeLower = "${BuildType.toLowerCase()}"
               NEXUS_VERSION = "nexus3"
@@ -19,12 +20,12 @@ pipeline {
               NEXUS_REPOSITORY = "CppLib"
               NEXUS_CREDENTIAL_ID = "nexus_cpplib"
   }
-    
+
   stages
-  {             
-        stage('Load Dependencies') 
-        {   
-          parallel  
+  {
+        stage('Load Dependencies')
+        {
+          parallel
           {
             stage("Linux Platform")
             {
@@ -38,30 +39,30 @@ pipeline {
                   script {
                               currentBuild.displayName = "[#${BUILD_NUMBER}]"
                               currentBuild.description = "Build Type: ${params.BuildType}\n"  +
-                                                        "Branch Name: ${env.BRANCH_NAME}\n" +                                               
+                                                        "Branch Name: ${env.BRANCH_NAME}\n" +
                                                         "Executed on: ${NODE_NAME}\n"
                           }
-                          
+
                   sh 'echo "create conan profile..."'
                   sh 'conan profile detect --force'
-                  
-                  sh 'echo "Loading..."'   
+
+                  sh 'echo "Loading..."'
                   script {
-                              if (BuildType == 'RelWithDebInfo') {
-                                sh 'conan install .  --build=missing  -s "&:build_type=$BuildType" -sbuild_type=Release'
+                              if (params.BuildType== 'RelWithDebInfo') {
+                                sh """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
                               }
                               else {
-                                sh 'conan install . -sbuild_type=$BuildType --build=missing'
+                                sh """conan install . -sbuild_type=${params.BuildType} --build=missing"""
                               }
-                          }     
-                
+                          }
+
                 }
             }
 
             stage("Windows Platform")
             {
               agent { label 'Physical-Agent-Windows'}
-              steps 
+              steps
                 {
                   echo 'Clean up...'
                   bat 'if exist build (rmdir build /S /Q)'
@@ -70,120 +71,124 @@ pipeline {
                   script {
                               currentBuild.displayName = "[#${BUILD_NUMBER}]"
                               currentBuild.description = "Build Type: ${params.BuildType}\n"  +
-                                                        "Branch Name: ${env.BRANCH_NAME}\n" +                                               
+                                                        "Branch Name: ${env.BRANCH_NAME}\n" +
                                                         "Executed on: ${NODE_NAME}\n"
+
                           }
 
                   bat 'echo "create conan profile..."'
                   bat 'conan profile detect --force'
-                  
+
                   echo "Loading..."
                   script {
-                              if (BuildType == 'RelWithDebInfo') {
-                                bat 'conan install .  --build=missing  -s "&:build_type=%BuildType%" -sbuild_type=Release'
+
+
+
+                              if (params.BuildType == 'RelWithDebInfo') {
+                                bat """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
                               }
                               else {
-                                bat 'conan install . -sbuild_type=%BuildType% --build=missing'
+                                bat """conan install . -sbuild_type=${params.BuildType} --build=missing"""
                               }
-                          }                 
+                          }
                 }
             }
           }
         }
 
         stage('Configure')
-        {    
-          parallel  
+        {
+          parallel
           {
             stage("Linux Platform")
             {
-              agent { label 'Docker-Agent-Linux'}              
-              steps 
-              {
-                sh 'echo "Configuring..."'        
-                sh 'cmake --preset conan-$buildTypeLower'       
-              }
-            }
-            stage("Windows Platform")
-            {
-              agent { label 'Physical-Agent-Windows'}              
-              steps 
-              {
-                bat 'echo "Configuring..."'        
-                bat 'cmake --preset conan-default'       
-              }
-            }
-          }
-        }
-
-        stage('Build') 
-        {
-          parallel  
-          {    
-            stage("Linux Platform")
-            {
               agent { label 'Docker-Agent-Linux'}
-              steps 
+              steps
               {
-                sh 'echo "Building..."'        
-                sh 'cmake --build --parallel 4  --preset conan-$buildTypeLower'        
-              }      
+                sh 'echo "Configuring..."'
+                sh 'cmake --preset conan-$buildTypeLower'
+              }
             }
             stage("Windows Platform")
             {
               agent { label 'Physical-Agent-Windows'}
-              steps 
+              steps
               {
-                bat 'echo "Building..."'        
-                bat 'cmake --build --parallel 4  --preset conan-%buildTypeLower%'        
-              }    
+                bat 'echo "Configuring..."'
+                bat 'cmake --preset conan-default'
+              }
             }
           }
         }
 
-        stage('Run UnitTests') 
+        stage('Build')
         {
-          parallel  
-          { 
+          parallel
+          {
+            stage("Linux Platform")
+            {
+              agent { label 'Docker-Agent-Linux'}
+              steps
+              {
+                sh 'echo "Building..."'
+                sh 'cmake --build --parallel 4  --preset conan-$buildTypeLower'
+              }
+            }
+            stage("Windows Platform")
+            {
+              agent { label 'Physical-Agent-Windows'}
+              steps
+              {
+                bat 'echo "Building..."'
+                bat 'cmake --build --parallel 4  --preset conan-%buildTypeLower%'
+              }
+            }
+          }
+        }
+
+        stage('Run UnitTests')
+        {
+          parallel
+          {
             stage("Linux Platform")
             {
               agent { label 'Docker-Agent-Linux'}
               steps {
-                sh 'echo "Running Unit Tests..."'   
-                sh 'ctest -V --build-config $BuildType --test-dir build/$BuildType --output-junit  unitTestReports.xml'     
-            
+                sh 'echo "Running Unit Tests..."'
+                sh """ctest -V --build-config ${params.BuildType} --test-dir build/${params.BuildType} --output-junit  unitTestReports.xml"""
+
                 sh 'echo "Running Coverage Tests..."'
-                sh 'ctest -V -T Coverage --test-dir build/$BuildType'
-                sh 'gcovr -r build/$BuildType --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml'     
+                sh """ctest -V -T Coverage --test-dir build/${params.BuildType}"""
+                sh """gcovr -r build/${params.BuildType} --cobertura-pretty --cobertura --exclude-unreachable-branches --exclude-throw-branches --print-summary --root . --output coverageTestsReports.xml"""
               }
               post {
                 success  {
-                    junit (testResults:'build/$BuildType/unitTestReports.xml', allowEmptyResults : true)
+                    junit (testResults:"""build/${params.BuildType}/unitTestReports.xml""", allowEmptyResults : true)
                 }
-              }                
+              }
             }
 
             stage("Windows Platform")
             {
               agent { label 'Physical-Agent-Windows'}
               steps {
-                bat 'echo "Running Unit Tests..."'   
-                bat 'ctest -V --build-config %BuildType% --test-dir build'                 
+                bat 'echo "Running Unit Tests..."'
+                bat """ctest -V --build-config ${params.BuildType} --test-dir build"""
               }
               post {
                 success  {
-                    junit (testResults:'build/%BuildType%/unitTestReports.xml', allowEmptyResults : true)
+                    junit (testResults:"""build/${params.BuildType}/unitTestReports.xml""", allowEmptyResults : true)
                 }
               }
-              
+
             }
           }
         }
 
-        // stage('SonarQube') 
+        // stage('SonarQube')
         // {
         //   agent { label 'Docker-Agent-Linux'}
-        //   steps 
+        //   steps
         //   {
         //     sh 'echo "Static C/C++ code analysis ===> CPPCHECK"'
         //     sh 'cppcheck \
@@ -195,9 +200,9 @@ pipeline {
         //         --std=c++17 \
         //         --platform=win64 \
         //         --xml \
-        //         --xml-version=2  src 2> cppcheck.xml'  
+        //         --xml-version=2  src 2> cppcheck.xml'
 
-        //     sh 'echo "Static C/C++ code analysis ===> RATS"'  
+        //     sh 'echo "Static C/C++ code analysis ===> RATS"'
         //     sh 'rats \
         //         -w 3 \
         //         --xml \
@@ -205,19 +210,19 @@ pipeline {
         //         src > rats.xml'
 
 
-        //     sh 'echo "Static C/C++ code analysis ===> CLANG"'  
+        //     sh 'echo "Static C/C++ code analysis ===> CLANG"'
         //     sh 'cd build/$BuildType && scan-build \
         //         -plist \
         //         -analyze-headers \
         //         -o clang_reports make'
 
-        //     sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'  
+        //     sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'
         //     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', message: 'Skip in case of cmd failure')
         //     {
         //       sh 'cd build/$BuildType && run-clang-tidy > clang-tidy.txt'
         //     }
 
-        //     script 
+        //     script
         //     {
         //         withSonarQubeEnv('sonarqube_cpplib') {
         //           sh "/opt/sonar-scanner/bin/sonar-scanner \
@@ -234,25 +239,25 @@ pipeline {
         //               -Dsonar.qualitygate.wait=true \
         //               -Dsonar.qualitygate.timeout=300 \
         //               -Dsonar.branchname=${env.BRANCH_NAME} \
-        //               -Dsonar.verbose=true " 
+        //               -Dsonar.verbose=true "
         //         }
         //     }
         //   }
         // }
 
-        stage('Package') 
+        stage('Package')
         {
-          parallel  
+          parallel
           {
             stage("Linux Platform")
             {
               agent { label 'Docker-Agent-Linux'}
               steps
               {
-                sh 'echo "Packaging..."'        
-                sh 'cd  build/$BuildType && make package'        
+                sh 'echo "Packaging..."'
+                sh """cd  build/${params.BuildType} && make package"""
               }
-              post 
+              post
               {
                 success
                 {
@@ -262,42 +267,42 @@ pipeline {
             }
             stage("Windows Platform")
             {
-              agent { label 'Physical-Agent-Windows'}   
+              agent { label 'Physical-Agent-Windows'}
               steps
               {
-                bat 'echo "Packaging..."'        
-                bat 'cd  build && cpack -C $BuildType'        
+                bat 'echo "Packaging..."'
+                bat 'cd  build && cpack -C $BuildType'
               }
-              post 
+              post
               {
                 success
                 {
-                    archiveArtifacts artifacts: '_PACKAGE_/CppLib-*.exe', onlyIfSuccessful: true                    
+                    archiveArtifacts artifacts: '_PACKAGE_/CppLib-*.exe', onlyIfSuccessful: true
                 }
               }
             }
           }
         }
 
-        stage("Publish to nexus") 
+        stage("Publish to nexus")
         {
-          parallel  
+          parallel
           {
             stage("Linux Platform")
             {
-              agent { label 'Docker-Agent-Linux'}    
+              agent { label 'Docker-Agent-Linux'}
                 steps {
                     script {
-                      if (BuildType == 'Release') {                    
+                      if (params.BuildType == 'Release') {
                         // Find built artifact under target folder
-                        filesByGlob = findFiles(glob: "_PACKAGE_/*.sh");                    
+                        filesByGlob = findFiles(glob: "_PACKAGE_/*.sh");
                         // Extract the path from the File found
                         artifactPath = filesByGlob[0].path;
                         // Assign to a boolean response verifying If the artifact name exists
-                        artifactExists = fileExists artifactPath;                   
+                        artifactExists = fileExists artifactPath;
                         //Extract current version
-                        versionExtracted = artifactPath.split('-')[1]                    
-                        if(artifactExists) {                            
+                        versionExtracted = artifactPath.split('-')[1]
+                        if(artifactExists) {
                             nexusArtifactUploader(
                                 nexusVersion: NEXUS_VERSION,
                                 protocol: NEXUS_PROTOCOL,
@@ -306,12 +311,12 @@ pipeline {
                                 version: "Linux-${BuildType}-${versionExtracted}",
                                 repository: NEXUS_REPOSITORY,
                                 credentialsId: NEXUS_CREDENTIAL_ID,
-                                artifacts: [                                
+                                artifacts: [
                                     [artifactId: NEXUS_REPOSITORY,
                                     classifier: 'Release',
                                     file: artifactPath,
                                     type: 'sh'
-                                    ]                                
+                                    ]
                                 ]
                             );
 
@@ -319,7 +324,7 @@ pipeline {
                             error "*** File: ${artifactPath}, could not be found";
                         }
                       } else {
-                        sh 'echo "Not a release build type for Publishing to Nexus"'    
+                        sh 'echo "Not a release build type for Publishing to Nexus"'
                       }
                     }
 
@@ -327,22 +332,22 @@ pipeline {
             }
             stage("Windows Platform")
             {
-              agent { label 'Physical-Agent-Windows'}  
-              steps 
+              agent { label 'Physical-Agent-Windows'}
+              steps
                {
-                  script 
+                  script
                   {
-                    if (BuildType == 'Release') {                                         
+                    if (params.BuildType == 'Release') {
                       // Find built artifact under target folder
-                      filesByGlob = findFiles(glob: "_PACKAGE_/*.exe");                    
+                      filesByGlob = findFiles(glob: "_PACKAGE_/*.exe");
                       // Extract the path from the File found
                       artifactPath = filesByGlob[0].path;
                       // Assign to a boolean response verifying If the artifact name exists
-                      artifactExists = fileExists artifactPath;                   
+                      artifactExists = fileExists artifactPath;
 					  //Extract current version
-                      versionExtracted = artifactPath.split('-')[1]  
-                                       
-                      if(artifactExists) {                          
+                      versionExtracted = artifactPath.split('-')[1]
+
+                      if(artifactExists) {
                           nexusArtifactUploader(
                               nexusVersion: NEXUS_VERSION,
                               protocol: NEXUS_PROTOCOL,
@@ -351,12 +356,12 @@ pipeline {
                               version: "Windows-${BuildType}-${versionExtracted}",
                               repository: NEXUS_REPOSITORY,
                               credentialsId: NEXUS_CREDENTIAL_ID,
-                              artifacts: [                                
+                              artifacts: [
                                   [artifactId: NEXUS_REPOSITORY,
                                   classifier: 'win64',
                                   file: artifactPath,
-                                  type: 'exe'								  
-                                  ]                                
+                                  type: 'exe'
+                                  ]
                               ]
                           );
 
@@ -364,20 +369,20 @@ pipeline {
                           error "*** File: ${artifactPath}, could not be found";
                       }
                     } else {
-                      bat 'echo "Not a release build type for Publishing to Nexus"'    
+                      bat 'echo "Not a release build type for Publishing to Nexus"'
                     }
                   }
                 }
             }
-          }            
+          }
         }
   }
-  
 
-  post 
-  {    
-    always 
-    {      
+
+  post
+  {
+    always
+    {
       emailext attachLog: true,
             body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}",
             recipientProviders: [developers(), requestor()],
@@ -385,5 +390,3 @@ pipeline {
     }
   }
 }
-
-
