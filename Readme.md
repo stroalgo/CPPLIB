@@ -3,7 +3,7 @@
 CPPLIB is c++ library
 ## Installation
 
-For linux : 
+For linux : wx wx wx 
 
 ```bash
 ./Cpplib-x.x.x-Linux.sh
