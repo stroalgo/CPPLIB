@@ -79,9 +79,7 @@ pipeline {
                                                         "Branch Name: ${env.BRANCH_NAME}\n" +
                                                         "Executed on: ${NODE_NAME}\n"
 
-                                                if (env.CHANGE_ID) {
-                                  params.BuildType = "Debug"
-                               }
+
                           }
 
                   bat 'echo "create conan profile..."'
@@ -89,6 +87,10 @@ pipeline {
 
                   echo "Loading..."
                   script {
+
+                            if (env.CHANGE_ID) {
+                                  BuildType = "Debug"
+                               }
                               if (BuildType == 'RelWithDebInfo') {
                                 bat 'conan install .  --build=missing  -s "&:build_type=%BuildType%" -sbuild_type=Release'
                               }
