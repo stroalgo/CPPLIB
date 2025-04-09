@@ -22,7 +22,7 @@ pipeline {
 
   stages
   {
-        stage('Load Dependencies')
+    stage('Load Dependencies')
         {
 
             stage('PR Stage') {
@@ -42,6 +42,8 @@ pipeline {
                 echo "This stage only runs for non-PR builds"
             }
         }
+        stage('Load Dependencies')
+        {
           parallel
           {
             stage("Linux Platform")
@@ -107,7 +109,7 @@ pipeline {
                   script {
 
                                   bat 'echo "--------------------------%env.CHANGE_ID%"'
-                                  bat 'echo "--------------------------%params.BuildType%"'
+                                  bat 'echo "--------------------------%%"'
                             if (env.CHANGE_ID) {
                                   BuildType = "Debug"
                                   bat 'echo "--------------------------pull request"'
