@@ -7,6 +7,7 @@ pipeline {
 
   parameters{
       choice(name:'BuildType', choices:'Debug\nRelease\nRelWithDebInfo',description:'Which type of build to consider?'
+       // The FIRST item in the choices array becomes the default
           )
   }
 
@@ -47,7 +48,7 @@ pipeline {
 
                   sh 'echo "Loading..."'
                   script {
-                              if ( ${params.BuildType} == 'RelWithDebInfo') {
+                              if (params.BuildType== 'RelWithDebInfo') {
                                 sh """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
                               }
                               else {
@@ -85,7 +86,7 @@ pipeline {
                                   bat "echo --------------------------${env.CHANGE_ID}"
                                   bat "echo -------------------------- ${params.BuildType}"
 
-                              if ( ${params.BuildType} == 'RelWithDebInfo') {
+                              if (params.BuildType == 'RelWithDebInfo') {
                                 bat """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
                               }
                               else {
