@@ -22,48 +22,6 @@ pipeline {
 
   stages
   {
-
-
-            stage('PR Stage') {
-            when {
-                changeRequest()
-            }
-            steps {
-                echo "This stage only runs for pull requests"
-            }
-        }
-
-        stage('Non-PR Stage') {
-            when {
-                not { changeRequest() }
-            }
-            steps {
-                echo "This stage only runs for non-PR builds"
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         stage('Load Dependencies')
         {
           parallel
@@ -82,10 +40,6 @@ pipeline {
                               currentBuild.description = "Build Type: ${params.BuildType}\n"  +
                                                         "Branch Name: ${env.BRANCH_NAME}\n" +
                                                         "Executed on: ${NODE_NAME}\n"
-
-                               if (env.CHANGE_ID) {
-                                  params.BuildType = "Debug"
-                               }
                           }
 
                   sh 'echo "create conan profile..."'
@@ -93,7 +47,7 @@ pipeline {
 
                   sh 'echo "Loading..."'
                   script {
-                              if (BuildType == 'RelWithDebInfo') {
+                              if ( ${params.BuildType} == 'RelWithDebInfo') {
                                 sh """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
                               }
                               else {
@@ -130,14 +84,8 @@ pipeline {
 
                                   bat "echo --------------------------${env.CHANGE_ID}"
                                   bat "echo -------------------------- ${params.BuildType}"
-                            if (env.CHANGE_ID) {
-                                  BuildType = "Debug"
-                                  bat 'echo "--------------------------pull request"'
-                               }
 
-
-
-                              if (BuildType == 'RelWithDebInfo') {
+                              if ( ${params.BuildType} == 'RelWithDebInfo') {
                                 bat """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
                               }
                               else {
