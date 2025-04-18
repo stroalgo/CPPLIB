@@ -90,7 +90,6 @@ add_link_options(
         -ffunction-sections
         -fdata-sections
         -fsanitize=signed-integer-overflow
-        -fsanitize=leak
         -fsanitize=null
         -fsanitize=vptr
         -fsanitize=object-size
@@ -172,7 +171,6 @@ add_compile_options(
     -fsanitize=vla-bound
     -fsanitize=return
     -fsanitize=signed-integer-overflow
-    -fsanitize=leak
     -fsanitize=null
     -fsanitize=vptr
     -fsanitize=object-size
@@ -200,3 +198,16 @@ add_compile_options(
 #     -fpch-preprocess
 #     -H
 )
+
+#---------------------------------------------------------Memory/Leak Profiling--------------------------------------------------------
+if(NOT BUILD_WITH_MEMCHECK_VAL)
+        add_link_options(
+                -fsanitize=leak
+                )
+        add_compile_options(
+                -fsanitize=leak
+                )
+        message("🟢 ASAN G++ built-in is used for memory/leak profiling")
+else()
+        message("🟢 VALGRIND is used for memory/leak profiling")
+endif()

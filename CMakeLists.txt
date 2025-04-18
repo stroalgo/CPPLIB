@@ -11,21 +11,22 @@ include(CommonFunctions)
 
 
 #---------------------------------------------------------Project Settings--------------------------------------------------------
-project(CppLib 
+project(CppLib
         VERSION 1.0.0
-        LANGUAGES CXX)    
-        
-        
+        LANGUAGES CXX)
+
+
 #---------------------------------------------------------Additional CMake modules--------------------------------------------------------
 include(GNUInstallDirs)
 
 #to ON for  creating compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #---------------------------------------------------------Options--------------------------------------------------------
-option(BUILD_WITH_TEST          "Build units tests"              ON)
-option(BUILD_WITH_DOC           "Generate Documentation"         OFF)
-option(BUILD_WITH_CODE_COVERAGE "Enable Code Coverage"           OFF)
-option(BUILD_WITH_CLANG          "Build with Clang Compiler"     OFF)
+option(BUILD_WITH_TEST          "Build units tests"                                     ON)
+option(BUILD_WITH_MEMCHECK_VAL  "Add a valgrind memory/leak check for each units tests" OFF)
+option(BUILD_WITH_DOC           "Generate Documentation"                                OFF)
+option(BUILD_WITH_CODE_COVERAGE "Enable Code Coverage"                                  OFF)
+option(BUILD_WITH_CLANG         "Build with Clang Compiler"                             OFF)
 
 #---------------------------------------------------------Language/Build--------------------------------------------------------
 #C Settings
@@ -68,7 +69,7 @@ endif()
 #Boost
 find_package(Boost REQUIRED )
 if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})    
+    include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
 #Openssl
@@ -95,9 +96,3 @@ add_subdirectory(src)
 #--------------------------------------------------------- Package--------------------------------------------------------
 include(Package)
 include(CPack)
-
-
-
-
-
-

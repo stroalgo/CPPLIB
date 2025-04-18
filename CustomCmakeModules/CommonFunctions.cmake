@@ -16,7 +16,7 @@ function(add_static_library NAME VERSION)
     # Set target version
     set_target_properties(
         ${NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION}
-    )    
+    )
 
     #Code Coverage
     if(CODE_COVERAGE)
@@ -53,7 +53,7 @@ function(add_shared_library NAME VERSION)
     # Set target version
     set_target_properties(
         ${NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION}
-    )      
+    )
 
     #Code Coverage
     if(BUILD_WITH_CODE_COVERAGE)
@@ -92,7 +92,7 @@ function(add_interface_library NAME VERSION)
     # Set target version
     set_target_properties(
         ${NAME} PROPERTIES VERSION ${VERSION} SOVERSION ${SOVERSION}
-    )   
+    )
 
     #Code Coverage
     if(BUILD_WITH_CODE_COVERAGE)
@@ -117,7 +117,7 @@ endfunction()
 function(make_doxygen_doc NAME VERSION DESCRIPTION)
     # Import Doxygen if it is not already the case
     find_package(Doxygen REQUIRED dot)
-    if(DOXYGEN_FOUND)   
+    if(DOXYGEN_FOUND)
         message("🟢 Add documentation for ${NAME}")
 
         # set input and output files
@@ -125,7 +125,7 @@ function(make_doxygen_doc NAME VERSION DESCRIPTION)
         set(DOXYGEN_PROJECT_VERSION ${VERSION})
         set(DOXYGEN_PROJECT_DESCRIPTION ${DESCRIPTION})
         set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/Docs/Doxyfile)
-        set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)        
+        set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
         configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
 
@@ -133,7 +133,7 @@ function(make_doxygen_doc NAME VERSION DESCRIPTION)
             COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
             WORKING_DIRECTORY   ${CMAKE_CURRENT_BINARY_DIR}
             COMMENT "Generating API documentation for ${NAME}"
-            VERBATIM 
+            VERBATIM
         )
 
         # Documentation installation
@@ -142,7 +142,7 @@ function(make_doxygen_doc NAME VERSION DESCRIPTION)
         )
     else()
         message("🔴 Doxygen need to be installed to generate the doxygen documentation")
-    endif()   
+    endif()
 endfunction()
 
 
@@ -156,21 +156,21 @@ function(add_unit_test NAME )
     message("🟢 Add Unitest for ${NAME}")
 
     #List all test files
-    file (GLOB_RECURSE  tests_SRC 
-           "${CMAKE_CURRENT_SOURCE_DIR}/unitTest/*.cpp" 
-           "${CMAKE_CURRENT_SOURCE_DIR}/unitTest/*.cxx"               
+    file (GLOB_RECURSE  tests_SRC
+           "${CMAKE_CURRENT_SOURCE_DIR}/unitTest/*.cpp"
+           "${CMAKE_CURRENT_SOURCE_DIR}/unitTest/*.cxx"
     )
-    
+
     # Add test executable target
     add_executable(${NAME}_test ${tests_SRC})
 
     # Find Google Test
-    find_package(GTest REQUIRED)    
-    
+    find_package(GTest REQUIRED)
+
     # Add test framework link libraries/dependencies
     target_link_libraries(
         ${NAME}_test PRIVATE ${NAME} GTest::gtest GTest::gtest_main ${ARGN}
-    )      
+    )
 
     # Add code coverage link libraries
     if(IS_LINUX)
@@ -185,11 +185,11 @@ function(add_unit_test NAME )
         ./test_result/
         DISCOVERY_MODE
         PRE_TEST
-    )    
+    )
 
     # Test target dependencies
-    add_dependencies(${NAME}_test ${NAME}) 
-    
+    add_dependencies(${NAME}_test ${NAME})
+
     #Check memory usage
     memcheck(${NAME}_test)
 endfunction()
@@ -199,21 +199,24 @@ endfunction()
 # Function to profile memory of a unit test (executable)
 # -----------------------------------------------------------------------------
 function(memcheck  UNIT_TEST)
-    find_program(VALGRIND "valgrind")
-    if (VALGRIND)
-        add_custom_target(${UNIT_TEST}_memchecked
-        COMMAND valgrind
-        --error-exitcode=1
-        --tool=memcheck
-        --leak-check=full
-        --show-reachable=yes
-        --track-fds=yes
-        --errors-for-leak-kinds=definite
-        --show-leak-kinds=definite $<TARGET_FILE:${UNIT_TEST}>)
+    if(IS_LINUX AND BUILD_WITH_MEMCHECK_VAL)
+        find_program(VALGRIND "valgrind")
+        if (VALGRIND)
+            add_custom_target(${UNIT_TEST}_memchecked
+            COMMAND valgrind
+            --error-exitcode=1
+            --tool=memcheck
+            --leak-check=full
+            --show-reachable=yes
+            --track-fds=yes
+            --errors-for-leak-kinds=definite
+            --show-leak-kinds=definite $<TARGET_FILE:${UNIT_TEST}>)
+        else()
+            message("🔴 Valgrind need to be installed to profile memory usage/leak")
+        endif()
     else()
-        message("🔴 Valgrind need to be installed to profile memory usage/leak")
-    endif()     
-    
+        #Dr memory from windows
+    endif()
 endfunction()
 
 
