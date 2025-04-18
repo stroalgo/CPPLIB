@@ -2,6 +2,7 @@ build/
 .vscode/launch.json
 .vscode/settings.json
 .cache
+.cmake
 _DELIVERY_/
 _PACKAGE_/
 CMakePresets.json

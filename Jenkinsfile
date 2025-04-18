@@ -1,9 +1,7 @@
 pipeline {
 
   agent any
-  tools {
-        maven "Maven"
-    }
+
 
   parameters{
       choice(name:'BuildType', choices:'Debug\nRelease\nRelWithDebInfo',description:'Which type of build to consider?'
@@ -131,7 +129,7 @@ pipeline {
               steps
               {
                 sh 'echo "Building..."'
-                sh 'cmake --build --parallel 4  --preset conan-$buildTypeLower'
+                sh 'cmake --build --parallel 4  --preset conan-$buildTypeLower | tee build.log'
               }
             }
             stage("Windows Platform")
@@ -140,7 +138,7 @@ pipeline {
               steps
               {
                 bat 'echo "Building..."'
-                bat 'cmake --build --parallel 4  --preset conan-%buildTypeLower%'
+                bat 'powershell "cmake --build --parallel 4  --preset conan-%buildTypeLower% |  tee build.log"'
               }
             }
           }
@@ -185,65 +183,67 @@ pipeline {
           }
         }
 
-        // stage('SonarQube')
-        // {
-        //   agent { label 'Docker-Agent-Linux'}
-        //   steps
-        //   {
-        //     sh 'echo "Static C/C++ code analysis ===> CPPCHECK"'
-        //     sh 'cppcheck \
-        //         --enable=all  \
-        //         -v \
-        //         --language=c++ \
-        //         --suppress=missingIncludeSystem \
-        //         --inconclusive \
-        //         --std=c++17 \
-        //         --platform=win64 \
-        //         --xml \
-        //         --xml-version=2  src 2> cppcheck.xml'
+        stage('SonarQube')
+        {
+          agent { label 'Docker-Agent-Linux'}
+          steps
+          {
+            sh 'echo "Static C/C++ code analysis ===> CPPCHECK"'
+            sh 'cppcheck \
+                --enable=all  \
+                -v \
+                --language=c++ \
+                --suppress=missingIncludeSystem \
+                --inconclusive \
+                --std=c++17 \
+                --platform=win64 \
+                --xml \
+                --xml-version=2  src 2> cppcheck.xml'
 
-        //     sh 'echo "Static C/C++ code analysis ===> RATS"'
-        //     sh 'rats \
-        //         -w 3 \
-        //         --xml \
-        //         -l "c" \
-        //         src > rats.xml'
+            sh 'echo "Static C/C++ code analysis ===> RATS"'
+            sh 'rats \
+                -w 3 \
+                --xml \
+                -l "c" \
+                src > rats.xml'
 
 
-        //     sh 'echo "Static C/C++ code analysis ===> CLANG"'
-        //     sh 'cd build/$BuildType && scan-build \
-        //         -plist \
-        //         -analyze-headers \
-        //         -o clang_reports make'
+            sh 'echo "Static C/C++ code analysis ===> CLANG"'
+            sh 'cd build/$BuildType && scan-build \
+                -plist \
+                -analyze-headers \
+                -o clang_reports make'
 
-        //     sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'
-        //     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', message: 'Skip in case of cmd failure')
-        //     {
-        //       sh 'cd build/$BuildType && run-clang-tidy > clang-tidy.txt'
-        //     }
+            sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'
+            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', message: 'Skip in case of cmd failure')
+            {
+              sh 'cd build/$BuildType && run-clang-tidy > clang-tidy.txt'
+            }
 
-        //     script
-        //     {
-        //         withSonarQubeEnv('sonarqube_cpplib') {
-        //           sh "/opt/sonar-scanner/bin/sonar-scanner \
-        //               -Dsonar.sources=src \
-        //               -Dsonar.projectKey=cpplib \
-        //               -Dsonar.cfamily.compile-commands=build/$BuildType/compile_commands.json \
-        //               -Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers \
-        //               -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
-        //               -Dsonar.cxx.rats.reportPaths=rats.xml \
-        //               -Dsonar.cxx.clangsa.reportPaths=build/$BuildType/clang_reports/*/*.plist \
-        //               -Dsonar.cxx.clangtidy.reportPaths=build/$BuildType/clang-tidy.txt \
-        //               -Dsonar.cxx.xunit.reportPaths=build/$BuildType/unitTestReports.xml \
-        //               -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml  \
-        //               -Dsonar.qualitygate.wait=true \
-        //               -Dsonar.qualitygate.timeout=300 \
-        //               -Dsonar.branchname=${env.BRANCH_NAME} \
-        //               -Dsonar.verbose=true "
-        //         }
-        //     }
-        //   }
-        // }
+            script
+            {
+                withSonarQubeEnv('sonarqube_cpplib') {
+                  sh "/opt/sonar-scanner/bin/sonar-scanner \
+                      -Dsonar.sources=src \
+                      -Dsonar.projectKey=cpplib \
+                      -Dsonar.cfamily.compile-commands=build/$BuildType/compile_commands.json \
+                      -Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers \
+                      -Dsonar.cxx.gcc.encoding=UTF-8  \
+                      -Dsonar.cxx.gcc.reportPaths=build.log \
+                      -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
+                      -Dsonar.cxx.rats.reportPaths=rats.xml \
+                      -Dsonar.cxx.clangsa.reportPaths=build/$BuildType/clang_reports/*/*.plist \
+                      -Dsonar.cxx.clangtidy.reportPaths=build/$BuildType/clang-tidy.txt \
+                      -Dsonar.cxx.xunit.reportPaths=build/$BuildType/unitTestReports.xml \
+                      -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml  \
+                      -Dsonar.qualitygate.wait=true \
+                      -Dsonar.qualitygate.timeout=300 \
+                      -Dsonar.branchname=${env.BRANCH_NAME} \
+                      -Dsonar.verbose=true "
+                }
+            }
+          }
+        }
 
         stage('Package')
         {

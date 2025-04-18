@@ -14,8 +14,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                 -fdelete-null-pointer-checks
                 -fipa-pta
                 -floop-parallelize-all
-                -fivopts         
-                -ftrivial-auto-var-init=zero   
+                -fivopts
+                -ftrivial-auto-var-init=zero
                 -flimit-function-alignment
                 -ftracer
                 -fstdarg-opt
@@ -27,8 +27,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                 #-fsection-anchors
         )
         message("🟢 GCC RELEASE options Flags added")
-        
-elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")        
+
+elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
         add_compile_options(
                 -g
                 -ggdb
@@ -37,12 +37,12 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
                 -fno-eliminate-unused-debug-types
                 -gvariable-location-views
                 -ftrivial-auto-var-init=zero
-                -fvtv-debug                            
+                -fvtv-debug
                 -fmem-report
                 -fstack-usage
                 -fstats
                 # -Q  N.B: Build is too long
-                
+
         )
         message("🟢 GCC RELEASE WITH DEBUG INFO options Flags added")
 
@@ -59,7 +59,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
                 -fno-eliminate-unused-debug-symbols
                 -O0
                 -ftrivial-auto-var-init=zero
-                -fprofile-abs-path                
+                -fprofile-abs-path
                 -fvtv-debug
                 -freport-bug
                 -fdump-earlydebug
@@ -67,8 +67,8 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
                 -fmem-report
                 -flto-report
                 -fstack-usage
-                -fstats         
-                -fsanitize=pointer-overflow      
+                -fstats
+                -fsanitize=pointer-overflow
 
                 # --coverage
                 # -Q  N.B: Build is too long
@@ -78,21 +78,21 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
                 #-p
         )
         message("🟢 GCC DEBUG options Flags added")
-endif()       
-        
+endif()
+
 #---------------------------------------------------------Compile Link options--------------------------------------------------------
 add_link_options(
         -pie
         -pthread
-        -shared-libgcc 
-        -ldl 
-        -Wl,-Map=linker-map.map        
+        -shared-libgcc
+        -ldl
+        -Wl,-Map=linker-map.map
         -ffunction-sections
-        -fdata-sections                
+        -fdata-sections
         -fsanitize=signed-integer-overflow
         -fsanitize=leak
         -fsanitize=null
-        -fsanitize=vptr    
+        -fsanitize=vptr
         -fsanitize=object-size
         -fsanitize=float-divide-by-zero
         -fsanitize=float-cast-overflow
@@ -101,22 +101,22 @@ add_link_options(
         -fsanitize=bool
         -fsanitize=enum
         -fsanitize=builtin
-        -fsanitize-address-use-after-scope   
-        -fsanitize-coverage=trace-cmp     
-)  
-        
+        -fsanitize-address-use-after-scope
+        -fsanitize-coverage=trace-cmp
+)
+
 #---------------------------------------------------------Common Compile options--------------------------------------------------------
 add_compile_options(
     -Wall
     -Werror
     -Wextra
-#     -Wdangling-reference
+    -Wdangling-reference
     -Wdelete-non-virtual-dtor
-#     -Winvalid-constexpr
+    -Winvalid-constexpr
     -Winvalid-imported-macros
     -Wnoexcept
     -Wclass-memaccess
-    -Wregister 
+    -Wregister
     -Wreorder
     -Wrange-loop-construct
     -Weffc++
@@ -135,7 +135,7 @@ add_compile_options(
     -Wnonnull
     -Winfinite-recursion
     -Winit-self
-    -Wuninitialized 
+    -Wuninitialized
     -Wmain
     -Wmisleading-indentation
     -Wmissing-attributes
@@ -153,15 +153,16 @@ add_compile_options(
     -Wunused-macros
     -Wcast-qual
     -Wdangling-else
-    -Wno-aggressive-loop-optimizations    
+    -Wno-aggressive-loop-optimizations
     -Wmissing-field-initializers
     -Wredundant-decls
     -Winvalid-pch
     -Wlong-long
     -fcheck-new
     -fstrict-enums
-    -fstrong-eval-order    
-    -fdiagnostics-show-location=every-line    
+    -fstrong-eval-order
+    -fdiagnostics-show-location=every-line
+    -fdiagnostics-show-option  #Enable build report for sonar analysis
     -fstack-protector
     -fsanitize=shift
     -fsanitize=shift-exponent
@@ -173,7 +174,7 @@ add_compile_options(
     -fsanitize=signed-integer-overflow
     -fsanitize=leak
     -fsanitize=null
-    -fsanitize=vptr    
+    -fsanitize=vptr
     -fsanitize=object-size
     -fsanitize=float-divide-by-zero
     -fsanitize=float-cast-overflow
@@ -184,17 +185,17 @@ add_compile_options(
     -fsanitize=builtin
     -fsanitize-address-use-after-scope
     -fsanitize-coverage=trace-cmp
-    -fsanitize=unreachable    
+    -fsanitize=unreachable
     -fcf-protection=full
     -fharden-compares
     -fharden-conditional-branches
-    -fstack-protector-strong   
+    -fstack-protector-strong
     -fexceptions
     -fdelete-dead-exceptions
     -ftrampolines
-    
+
     #Precompiled Headers
-#     -x 
+#     -x
 #     -fpreprocessed
 #     -fpch-preprocess
 #     -H
