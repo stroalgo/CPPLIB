@@ -1,0 +1,4 @@
+[default.extend-words]
+# Don't correct the surname "Teh"
+Ot = "Ot"
+Fo = "Fo"

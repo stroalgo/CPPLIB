@@ -5,7 +5,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                 /O2                     #Creates fast code
                 /Ob1                    # Controls inline expansion
                 /Ot                     #Favors fast code
-                /Os                     #Favors small code     	
+                /Os                     #Favors small code
                 /Oi                     #Replaces some function calls with intrinsic that help your application run faster.
                 /fp:fast                #option allows the compiler to reorder, combine, or simplify floating-point operations to optimize floating-point code for speed and space.
                 /Qfast_transcendentals  #option forces transcendental functions to be converted to inline code to improve execution speed
@@ -15,13 +15,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                 /RELEASE        #Sets the Checksum in the .exe header.
                 /MD             #Compiles to create a multithreaded DLL
         )
-        
-elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")        
+
+elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
         add_compile_options(
                 /GA #Optimizes for Windows applications.
                 /O1 #Creates small code
                 /O2 #Creates fast code
-                /Os #Favors small code     	
+                /Os #Favors small code
                 /Zi #Generates complete debugging information.
       )
 
@@ -37,34 +37,35 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
                 /RTCs                   #Enables stack frame run-time error checking
                 /RTCu                   #Reports when a variable is used without having been initialized.
                 /RTC1                   #Enable fast runtime checks
-                /Fo                     #Creates an object file.           
+                /Fo                     #Creates an object file.
                 /FC                     #Displays the full path of source code files passed to cl.exe in diagnostic text.
-                /Zf                     #Improves PDB generation time in parallel builds.                
-                /showIncludes           #Displays a list of all include files during compilation.             
+                /Zf                     #Improves PDB generation time in parallel builds.
+                /showIncludes           #Displays a list of all include files during compilation.
         )
 
         add_link_options(
                 /PROFILE        #Produces an output file that can be used with the Performance Tools profiler.
-                /LDd            #Creates a debug dynamic-link library.  
-                /MDd            #Compiles to create a debug multithreaded DLL                
+                /LDd            #Creates a debug dynamic-link library.
+                /MDd            #Compiles to create a debug multithreaded DLL
         )
-endif()       
-        
+endif()
+
 #---------------------------------------------------------Compile Link options--------------------------------------------------------
-add_link_options(        
+add_link_options(
         /WX             #Treats linker warnings as errors.
         /MACHINE:x64    #Specifies the target platform.
-        /APPCONTAINER   #Specifies whether the app must run within an appcontainer process environment.       
-)  
-        
+        /APPCONTAINER   #Specifies whether the app must run within an appcontainer process environment.
+)
+
 #---------------------------------------------------------Common Compile options--------------------------------------------------------
 add_compile_options(
         # /await #Option enables compiler support for C++ coroutines
+        /W4                                     #Displays level 1, level 2, and level 3 warnings, and all level 4 (informational) warnings that aren't off by default.
         /WX                                     #Treats all compiler warnings as errors.
         /external:anglebrackets                 #Treat all headers included via <> as external.
         /WL                                     #Enable one-line diagnostics for error and warning messages
         /options:strict                         #Unrecognized compiler options are errors.
-        /EHa                                    #Enable C++ exception handling (with SEH exceptions).
+        /EHa                                    #Enable C++ exception handling (with SHE exceptions).
         /GF                                     #Optimization called string pooling that can create smaller programs.
         /GS                                     #Detects some buffer overruns that overwrite a function's return address
         /GT                                     #Supports fiber safety for data allocated using static thread-local storage
