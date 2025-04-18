@@ -4,9 +4,13 @@ pipeline {
 
 
   parameters{
-      choice(name:'BuildType', choices:'Debug\nRelease\nRelWithDebInfo',description:'Which type of build to consider?'
-       // The FIRST item in the choices array becomes the default
-          )
+
+      //Enable Valgrind
+      booleanParam(name: 'valgrind', defaultValue: false, description:'Enable Valgrind for profiling Memory/Leak')
+
+      //Build Type
+      //The FIRST item in the choices array becomes the default
+      choice(name:'BuildType', choices:'Debug\nRelease\nRelWithDebInfo',description:'Which type of build to consider?')
   }
 
   environment
