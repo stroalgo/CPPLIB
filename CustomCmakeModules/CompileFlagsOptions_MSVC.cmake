@@ -60,7 +60,7 @@ add_link_options(
 #---------------------------------------------------------Common Compile options--------------------------------------------------------
 add_compile_options(
         # /await #Option enables compiler support for C++ coroutines
-        /W4                                     #Displays level 1, level 2, and level 3 warnings, and all level 4 (informational) warnings that aren't off by default.
+        # /W4                                     #Displays level 1, level 2, and level 3 warnings, and all level 4 (informational) warnings that aren't off by default.
         /WX                                     #Treats all compiler warnings as errors.
         /external:anglebrackets                 #Treat all headers included via <> as external.
         /WL                                     #Enable one-line diagnostics for error and warning messages

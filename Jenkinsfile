@@ -6,7 +6,7 @@ pipeline {
   parameters{
 
       //Enable Valgrind
-      booleanParam(name: 'valgrind', defaultValue: false, description:'Enable Valgrind for profiling Memory/Leak')
+      booleanParam(name:'valgrind', defaultValue: false, description:'Enable Valgrind for profiling Memory/Leak')
 
       //Build Type
       //The FIRST item in the choices array becomes the default
@@ -83,9 +83,6 @@ pipeline {
 
                   echo "Loading..."
                   script {
-
-
-
                               if (params.BuildType == 'RelWithDebInfo') {
                                 bat """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
                               }
@@ -108,7 +105,15 @@ pipeline {
               steps
               {
                 sh 'echo "Configuring..."'
-                sh 'cmake --preset conan-$buildTypeLower'
+                script
+                {
+                  if (params.valgrind) {
+                    sh 'cmake -DBUILD_WITH_MEMCHECK_VAL=ON --preset conan-$buildTypeLower'
+                  }
+                  else {
+                    sh 'cmake --preset conan-$buildTypeLower'
+                  }
+                }
               }
             }
             stage("Windows Platform")
@@ -239,6 +244,7 @@ pipeline {
                           -Dsonar.cxx.gcc.reportPaths=lin_build.log \
                           -Dsonar.cxx.vc.encoding=UTF-8 \
                           -Dsonar.cxx.vc.reportPaths=win_build.log \
+                          -Dsonar.cxx.valgrind.reportPaths=build/${params.BuildType}/**/*_test_valgrind.xml \
                           -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
                           -Dsonar.cxx.rats.reportPaths=rats.xml \
                           -Dsonar.cxx.clangsa.reportPaths=build/$BuildType/clang_reports/*/*.plist \

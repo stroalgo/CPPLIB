@@ -191,25 +191,26 @@ function(add_unit_test NAME )
     add_dependencies(${NAME}_test ${NAME})
 
     #Check memory usage
-    memcheck(${NAME}_test)
+    memorycheck(${NAME}_test)
 endfunction()
 
 
 # -----------------------------------------------------------------------------
 # Function to profile memory of a unit test (executable)
 # -----------------------------------------------------------------------------
-function(memcheck  UNIT_TEST)
+function(memorycheck  UNIT_TEST)
     if(IS_LINUX AND BUILD_WITH_MEMCHECK_VAL)
         find_program(VALGRIND "valgrind")
         if (VALGRIND)
-            add_custom_target(${UNIT_TEST}_memchecked
-            COMMAND valgrind
+            add_test(NAME ${UNIT_TEST}_memchecked COMMAND valgrind
             --error-exitcode=1
             --tool=memcheck
             --leak-check=full
             --show-reachable=yes
             --track-fds=yes
             --errors-for-leak-kinds=definite
+            --xml=yes
+            --xml-file=${UNIT_TEST}_valgrind.xml
             --show-leak-kinds=definite $<TARGET_FILE:${UNIT_TEST}>)
         else()
             message("🔴 Valgrind need to be installed to profile memory usage/leak")
