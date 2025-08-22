@@ -17,10 +17,14 @@ repos:
     rev: v1.3.5
     hooks:
       - id: clang-format
-      - id: clang-tidy
-      - id: uncrustify
-      - id: cppcheck
+        args: [--style=Google]
       - id: cpplint
+        args: [--repository=src]
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.10
+    hooks:
+      - id: cmake-format
+      - id: cmake-lint
   - repo: https://github.com/hhatto/autopep8
     #autopep8 automatically formats Python code to conform to the PEP 8 style guide
 
