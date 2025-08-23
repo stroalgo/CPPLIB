@@ -4,11 +4,11 @@
 namespace Utilities::Exceptions {
 /**
  * @brief Class to handle Logger exception
+ @todo: change to  AppException as template maybe
  *
  */
 class LoggerException : public std::exception {
-
-public:
+ public:
   /**
    * @brief Construct a new Logger Exception object
    *
@@ -23,7 +23,7 @@ public:
    */
   const char *what() { return message.c_str(); }
 
-private:
+ private:
   /**
    * @brief Exception message
    * @private
@@ -32,4 +32,4 @@ private:
   const std::string &message;
 };
 
-} // namespace Utilities::Exceptions
+}  // namespace Utilities::Exceptions

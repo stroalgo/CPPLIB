@@ -20,6 +20,8 @@ target_sources(${PROJECT_NAME} PRIVATE sources/Settings.cpp)
 # Include directories
 target_include_directories(${PROJECT_NAME} PUBLIC headers/)
 
+target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost Common)
+
 # -----------------------------------------------------------------------------
 # Documentation
 # -----------------------------------------------------------------------------
