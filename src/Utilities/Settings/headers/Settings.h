@@ -13,6 +13,7 @@
 #ifndef UTILITIES_SETTINGS_HEADERS_SETTINGS_H_
 #define UTILITIES_SETTINGS_HEADERS_SETTINGS_H_
 
+#include <boost/log/trivial.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <string>
 #include <string_view>
@@ -48,14 +49,27 @@ class Settings {
    */
   inline const std::string_view GetSettingsFilePath() {
     return m_SettingsFilePath;
-  }
+  };
 
   /**
    * @brief Get the Log Path object
    * @memberof Settings
    * @return const std::string_view&
+   * @public
    */
-  const std::string_view GetSettingLogPath();
+  inline const std::string_view GetSettingLogPath() {
+    return m_LoggerSettings.m_SettingLogPath;
+  };
+
+  /**
+   * @brief Get the Log Level
+   * @memberof Settings
+   * @return const std::string_view&
+   * @public
+   */
+  inline const boost::log::trivial::severity_level& GetSettingLogLevel() {
+    return m_LoggerSettings.m_SettingLogLevel;
+  };
 
   /**
    * @brief Load settings from file
@@ -89,6 +103,8 @@ class Settings {
    */
   struct LoggerSettings {
     std::string m_SettingLogPath{"LOGS/"};
+    boost::log::trivial::severity_level m_SettingLogLevel{
+        boost::log::trivial::trace};
   } m_LoggerSettings{};
 
   /**
