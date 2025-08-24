@@ -26,7 +26,7 @@ class SettingsManagerTest : public ::testing::Test {
     lSettingsFile.close();
   }
 
-  void CreateMockSettingsFile(std::string_view pLogsPathFolder) {
+  void CreateMockSettingsFile(std::string_view pLogsPathFolder = "") {
     std::ofstream lSettingsFile("settings.ini");
     if (lSettingsFile.is_open()) {
       lSettingsFile << "[Logger]" << std::endl;
@@ -79,7 +79,18 @@ TEST_F(SettingsManagerTest, LoadSettings_FileExistsEmpty) {
       lLogsPathFolder);
 }
 
-TEST_F(SettingsManagerTest, LoadSettings_FileExists) {
+TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogPathEmpty) {
+  // Create an settings.ini file
+  CreateMockSettingsFile();
+  Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
+
+  constexpr std::string_view lLogsPathFolder = "LOGS/";
+  EXPECT_EQ(
+      Utilities::Settings::SettingsManager::GetInstance().GetSettingLogPath(),
+      lLogsPathFolder);
+}
+
+TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogPathExists) {
   // Create an settings.ini file
   constexpr std::string_view lLogsPathFolder = "LOGS/path/logs/PATH";
   CreateMockSettingsFile(lLogsPathFolder);

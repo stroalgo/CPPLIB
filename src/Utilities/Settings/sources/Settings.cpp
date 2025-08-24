@@ -10,6 +10,8 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <filesystem>
 
+#include "Exceptions.h"
+
 namespace Utilities::Settings {
 
 const std::string_view Settings::GetSettingLogPath() {
@@ -36,14 +38,23 @@ void Settings::LoadSettings() {
     boost::property_tree::ini_parser::read_ini(std::string(m_SettingsFilePath),
                                                lSettingsTree);
 
-    // Populate Logger settings struct
-    m_LoggerSettings.m_SettingLogPath =
-        std::move(lSettingsTree.get<std::string>(
-            "Logger.LogPath", m_LoggerSettings.m_SettingLogPath));
+    // Check and Populate LogPath of LoggerSettings struct
+    const std::string& lSettingPath{lSettingsTree.get<std::string>(
+        "Logger.LogPath", m_LoggerSettings.m_SettingLogPath)};
+    if (lSettingPath.empty())  //|| lSettingPath == " " || lSettingPath == "\n"
+                               //||    lSettingPath == "\t")
+    {
+      throw Utilities::Exceptions::LoggerException(
+          "Logger.LogPath setting is empty in settings.ini file");
+    } else {
+      m_LoggerSettings.m_SettingLogPath = lSettingPath;
+    }
 
     // Flag to indicate settings loaded successfully
     m_SettingsLoaded = true;
   } catch (...) {
+    // In case of any error (file not found, parse error, etc...) create a
+    // default settings file
     CreateDefaultSettingsFile();
   }
 }
