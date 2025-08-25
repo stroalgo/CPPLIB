@@ -20,6 +20,7 @@ void Settings::CreateDefaultSettingsFile() {
   boost::property_tree::ptree lSettingsTree{};
   lSettingsTree.put<std::string>("Logger.LogPath",
                                  m_LoggerSettings.m_SettingLogPath);
+  CreateLogsFolder(m_LoggerSettings.m_SettingLogPath);
 
   // Default log level is trace
   lSettingsTree.put<boost::log::trivial::severity_level>(
@@ -33,6 +34,12 @@ void Settings::CreateDefaultSettingsFile() {
   m_SettingsLoaded = true;
 }
 
+void Settings::CreateLogsFolder(const std::string& pLogsPath) {
+  if (!std::filesystem::exists(pLogsPath)) {
+    std::filesystem::create_directories(pLogsPath);
+  }
+}
+
 void Settings::LoadSettings() {
   try {
     // Load settings from file
@@ -43,27 +50,18 @@ void Settings::LoadSettings() {
     // Check and Populate LogPath of LoggerSettings struct
     const std::string& lSettingPath{lSettingsTree.get<std::string>(
         "Logger.LogPath", m_LoggerSettings.m_SettingLogPath)};
-    if (lSettingPath.empty())  //|| lSettingPath == " " || lSettingPath == "\n"
-                               //||    lSettingPath == "\t")
-    {
-      throw Utilities::Exceptions::LoggerException(
-          "Logger.LogPath setting is empty in settings.ini file");
-    } else {
-      m_LoggerSettings.m_SettingLogPath = lSettingPath;
-    }
+
+    CreateLogsFolder(lSettingPath);
+    m_LoggerSettings.m_SettingLogPath =
+        std::filesystem::path(lSettingPath).c_str();
 
     const auto& lSettingLevel{
         lSettingsTree.get<boost::log::trivial::severity_level>(
             "Logger.LogLevel", m_LoggerSettings.m_SettingLogLevel)};
 
-    // Check and Populate LogLevel of LoggerSettings struct
-    if (lSettingLevel < boost::log::trivial::trace ||
-        lSettingLevel > boost::log::trivial::fatal) {
-      throw Utilities::Exceptions::LoggerException(
-          "Logger.LogLevel setting is invalid in settings.ini file");
-    } else {
-      m_LoggerSettings.m_SettingLogLevel = lSettingLevel;
-    }
+    // Populate LogLevel of LoggerSettings struct
+    m_LoggerSettings.m_SettingLogLevel = lSettingLevel;
+
     // Flag to indicate settings loaded successfully
     m_SettingsLoaded = true;
   } catch (...) {

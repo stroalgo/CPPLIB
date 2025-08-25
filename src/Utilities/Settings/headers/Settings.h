@@ -102,7 +102,7 @@ class Settings {
    * @private
    */
   struct LoggerSettings {
-    std::string m_SettingLogPath{"LOGS/"};
+    std::string m_SettingLogPath{"LOGS"};
     boost::log::trivial::severity_level m_SettingLogLevel{
         boost::log::trivial::trace};
   } m_LoggerSettings{};
@@ -113,6 +113,14 @@ class Settings {
    * @private
    */
   void CreateDefaultSettingsFile();
+
+  /**
+   * @brief Create logs folder if it does not exist
+   * @memberof Settings
+   * @param pLogsPath The path to the logs folder
+   * @private
+   */
+  void CreateLogsFolder(const std::string& pLogsPath);
 
   /**
    * @brief Settings file path

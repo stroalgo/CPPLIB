@@ -18,6 +18,9 @@ class SettingsManagerTest : public ::testing::Test {
     if (std::filesystem::exists("settings.ini")) {
       std::filesystem::remove_all("settings.ini");
     }
+    if (std::filesystem::exists("LOGS")) {
+      std::filesystem::remove_all("LOGS");
+    }
   }
 
  public:
@@ -59,26 +62,59 @@ TEST_F(SettingsManagerTest, GetSettingsFilePath) {
       "settings.ini");
 }
 
+TEST_F(SettingsManagerTest, LoadSettings_noFileExists) {
+  EXPECT_FALSE(
+      Utilities::Settings::SettingsManager::GetInstance().AreSettingsLoaded());
+
+  Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
+
+  EXPECT_TRUE(
+      Utilities::Settings::SettingsManager::GetInstance().AreSettingsLoaded());
+
+  // In case of no file found the LoadSettings function must create
+  // settings.ini file with default settings
+  std::string_view lSettingsFilePath =
+      Utilities::Settings::SettingsManager::GetInstance().GetSettingsFilePath();
+  EXPECT_TRUE(std::filesystem::exists(lSettingsFilePath));
+
+  // Default log path is LOGS
+  EXPECT_EQ(
+      Utilities::Settings::SettingsManager::GetInstance().GetSettingLogPath(),
+      "LOGS");
+  // Default log level is trace
+  EXPECT_EQ(
+      Utilities::Settings::SettingsManager::GetInstance().GetSettingLogLevel(),
+      boost::log::trivial::trace);
+}
 TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogPathEmpty) {
   // Create an settings.ini file
   CreateMockSettingsFile();
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
 
-  constexpr std::string_view lLogsPathFolder = "LOGS/";
+  // Default log path is LOGS
   EXPECT_EQ(
       Utilities::Settings::SettingsManager::GetInstance().GetSettingLogPath(),
-      lLogsPathFolder);
+      "LOGS");
+
+  // Log directory must be created
+  EXPECT_TRUE(std::filesystem::exists(
+      Utilities::Settings::SettingsManager::GetInstance().GetSettingLogPath()));
 }
 
 TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogPathExists) {
   // Create an settings.ini file
-  constexpr std::string_view lLogsPathFolder = "LOGS/path/logs/PATH";
+  const std::string_view lLogsPathFolder{
+      std::filesystem::path("LOGS/path/logs/PATH/Valid").c_str()};
   CreateMockSettingsFile(lLogsPathFolder);
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
 
   EXPECT_EQ(
       Utilities::Settings::SettingsManager::GetInstance().GetSettingLogPath(),
       lLogsPathFolder);
+
+  // Log directory created with the given path
+  EXPECT_TRUE(std::filesystem::exists(
+      Utilities::Settings::SettingsManager::GetInstance().GetSettingLogPath()));
 }
 
 // TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogPathInvalid) {
@@ -98,7 +134,8 @@ TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogLevelEmpty) {
 
 TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogLevelInvalid) {
   // Create an settings.ini file
-  CreateMockSettingsFile("logs/Path/Valid/", "/**inv@lid-log_level++%");
+  CreateMockSettingsFile("LOGS/path/logs/PATH/Valid",
+                         "/**inv@lid-log_level++%");
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
 
   EXPECT_EQ(
@@ -108,79 +145,39 @@ TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogLevelInvalid) {
 
 TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogLevelValid) {
   // Create an settings.ini file
-  CreateMockSettingsFile("logs/Path/Valid/", "trace");
+  CreateMockSettingsFile("LOGS/path/logs/PATH/Valid", "trace");
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
   EXPECT_EQ(
       Utilities::Settings::SettingsManager::GetInstance().GetSettingLogLevel(),
       boost::log::trivial::trace);
 
-  CreateMockSettingsFile("logs/Path/Valid/", "debug");
+  CreateMockSettingsFile("LOGS/path/logs/PATH/Valid", "debug");
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
   EXPECT_EQ(
       Utilities::Settings::SettingsManager::GetInstance().GetSettingLogLevel(),
       boost::log::trivial::debug);
 
-  CreateMockSettingsFile("logs/Path/Valid/", "info");
+  CreateMockSettingsFile("LOGS/path/logs/PATH/Valid", "info");
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
   EXPECT_EQ(
       Utilities::Settings::SettingsManager::GetInstance().GetSettingLogLevel(),
       boost::log::trivial::info);
 
-  CreateMockSettingsFile("logs/Path/Valid/", "warning");
+  CreateMockSettingsFile("LOGS/path/logs/PATH/Valid", "warning");
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
   EXPECT_EQ(
       Utilities::Settings::SettingsManager::GetInstance().GetSettingLogLevel(),
       boost::log::trivial::warning);
 
-  CreateMockSettingsFile("logs/Path/Valid/", "error");
+  CreateMockSettingsFile("LOGS/path/logs/PATH/Valid", "error");
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
   EXPECT_EQ(
       Utilities::Settings::SettingsManager::GetInstance().GetSettingLogLevel(),
       boost::log::trivial::error);
 
-  CreateMockSettingsFile("logs/Path/Valid/", "fatal");
+  CreateMockSettingsFile("LOGS/path/logs/PATH/Valid", "fatal");
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
   EXPECT_EQ(
       Utilities::Settings::SettingsManager::GetInstance().GetSettingLogLevel(),
       boost::log::trivial::fatal);
-}
-
-TEST_F(SettingsManagerTest, LoadSettings_noFileExists) {
-  Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
-
-  // In case of no file found the LoadSettings function must create
-  // settings.ini file with default settings
-  std::string_view lSettingsFilePath =
-      Utilities::Settings::SettingsManager::GetInstance().GetSettingsFilePath();
-  EXPECT_TRUE(std::filesystem::exists(lSettingsFilePath));
-
-  constexpr std::string_view lLogsPathFolder = "LOGS/";
-  EXPECT_EQ(
-      Utilities::Settings::SettingsManager::GetInstance().GetSettingLogPath(),
-      lLogsPathFolder);
-}
-
-TEST_F(SettingsManagerTest, LoadSettings_FileExistsEmpty) {
-  // Create an empty settings.ini file
-  CreateEmptySettingsFile();
-  Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
-
-  std::string_view lSettingsFilePath =
-      Utilities::Settings::SettingsManager::GetInstance().GetSettingsFilePath();
-  EXPECT_TRUE(std::filesystem::exists(lSettingsFilePath));
-
-  constexpr std::string_view lLogsPathFolder = "LOGS/";
-  EXPECT_EQ(
-      Utilities::Settings::SettingsManager::GetInstance().GetSettingLogPath(),
-      lLogsPathFolder);
-}
-
-TEST_F(SettingsManagerTest, LoadSettings_successfully) {
-  EXPECT_FALSE(
-      Utilities::Settings::SettingsManager::GetInstance().AreSettingsLoaded());
-
-  Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
-
-  EXPECT_TRUE(
-      Utilities::Settings::SettingsManager::GetInstance().AreSettingsLoaded());
 }
