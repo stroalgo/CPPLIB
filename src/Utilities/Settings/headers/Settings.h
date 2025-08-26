@@ -15,6 +15,7 @@
 
 #include <boost/log/trivial.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <map>
 #include <string>
 #include <string_view>
 
@@ -72,6 +73,22 @@ class Settings {
   };
 
   /**
+   * @brief Get the Module Log Level
+   *
+   * @param pModuleName Name of the module
+   * @return The level of module logger
+   */
+  const boost::log::trivial::severity_level& GetSettingModuleLogLevel(
+      const std::string& pModuleName);
+
+  /**
+   * @brief Check if module settings exist
+   * @param pModuleName Name of the module
+   * @return true if module settings exist, false otherwise
+   */
+  bool IsModuleSettingsLoaded(const std::string& pModuleName);
+
+  /**
    * @brief Load settings from file
    * @memberof Settings
    * @public
@@ -106,6 +123,25 @@ class Settings {
     boost::log::trivial::severity_level m_SettingLogLevel{
         boost::log::trivial::trace};
   } m_LoggerSettings{};
+
+  /**
+   * @brief Struct to hold every settings related to a module
+   * @memberof Settings
+   * @struct ModuleSettings
+   * @private
+   */
+  struct ModuleSettings {
+    std::string m_ModuleName{""};
+    boost::log::trivial::severity_level m_ModuleLogLevel{
+        boost::log::trivial::trace};
+  };
+
+  /**
+   * @brief Map to hold every module settings
+   * @memberof Settings
+   * @private
+   */
+  std::map<const std::string_view, ModuleSettings> m_ModulesSettings{};
 
   /**
    * @brief Create a default settings file
