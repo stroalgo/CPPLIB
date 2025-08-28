@@ -101,7 +101,7 @@ void Settings::LoadSettings() {
     auto modulesSection = lSettingsTree.get_child("Modules");
     m_ModulesSettings.clear();
     const boost::regex special_char_regex("[^a-zA-Z0-9_]");
-    for (const auto module : modulesSection) {
+    for (const auto& module : modulesSection) {
       const std::string& lModuleName{module.first};
 
       // Validate ModuleName
