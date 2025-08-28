@@ -266,17 +266,21 @@ TEST_F(SettingsManagerTest, LoadSettings_FileExists_ModulesEmpty) {
   }
 }
 
-// TEST_F(SettingsManagerTest, LoadSettings_FileExists_NewModule_NameEmpty) {
-//   // Create an settings.ini file
-//   std::map<std::string, std::string> pModules{{"", "info"}};
+TEST_F(SettingsManagerTest, LoadSettings_FileExists_NewModule_NameEmpty) {
+  // Create an settings.ini file
+  std::map<std::string, std::string> pModules{{"", "info"}};
 
-//   CreateMockSettingsFile("LOGS/path/logs/PATH/Valid", "info", pModules);
-//   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
+  CreateMockSettingsFile("LOGS/path/logs/PATH/Valid", "info", pModules);
+  Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
 
-//   // A module with empty name will not be loaded
-//   EXPECT_FALSE(Utilities::Settings::SettingsManager::GetInstance()
-//                    .IsModuleSettingsLoaded(""));
-// }
+  // A module with empty name will not be loaded
+  EXPECT_FALSE(Utilities::Settings::SettingsManager::GetInstance()
+                   .IsModuleSettingsLoaded(""));
+
+  EXPECT_THROW(Utilities::Settings::SettingsManager::GetInstance()
+                   .GetSettingModuleLogLevel(""),
+               std::exception);
+}
 
 TEST_F(SettingsManagerTest, LoadSettings_FileExists_ModuleNew_NameInvalid) {
   // Create an settings.ini file
@@ -288,6 +292,10 @@ TEST_F(SettingsManagerTest, LoadSettings_FileExists_ModuleNew_NameInvalid) {
   // A module with empty name will not be loaded with invalid log level
   EXPECT_FALSE(Utilities::Settings::SettingsManager::GetInstance()
                    .IsModuleSettingsLoaded("@ill_$formatted"));
+
+  EXPECT_THROW(Utilities::Settings::SettingsManager::GetInstance()
+                   .GetSettingModuleLogLevel("@ill_$formatted"),
+               std::exception);
 }
 
 TEST_F(SettingsManagerTest,
