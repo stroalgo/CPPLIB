@@ -58,7 +58,7 @@ void Settings::CreateDefaultSettingsFile() {
     ModuleSettings lModuleSettings{};
     lModuleSettings.m_ModuleName = lModule;
     lModuleSettings.m_ModuleLogLevel = boost::log::trivial::trace;
-    m_ModulesSettings[lModule] = lModuleSettings;
+    m_ModulesSettings[std::string(lModule)] = lModuleSettings;
   }
 
   // Save default settings to file
@@ -88,7 +88,7 @@ void Settings::LoadSettings() {
 
     CreateLogsFolder(lSettingPath);
     m_LoggerSettings.m_SettingLogPath =
-        std::filesystem::path(lSettingPath).c_str();
+        std::filesystem::path(lSettingPath).make_preferred().string();
 
     const auto& lSettingLevel{
         lSettingsTree.get<boost::log::trivial::severity_level>(
@@ -101,7 +101,7 @@ void Settings::LoadSettings() {
     auto modulesSection = lSettingsTree.get_child("Modules");
     m_ModulesSettings.clear();
     const boost::regex special_char_regex("[^a-zA-Z0-9_]");
-    for (const auto& module : modulesSection) {
+    for (const auto module : modulesSection) {
       const std::string& lModuleName{module.first};
 
       // Validate ModuleName
@@ -116,7 +116,8 @@ void Settings::LoadSettings() {
         ModuleSettings lModuleSettings{};
         lModuleSettings.m_ModuleName = lModuleName;
         lModuleSettings.m_ModuleLogLevel = lModuleLogLevel;
-        m_ModulesSettings[lModuleName] = lModuleSettings;
+        m_ModulesSettings.emplace(lModuleSettings.m_ModuleName,
+                                  lModuleSettings);
       }
     }
 

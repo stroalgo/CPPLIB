@@ -130,7 +130,9 @@ TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogPathInvalid) {
 TEST_F(SettingsManagerTest, LoadSettings_FileExists_LogPathExists) {
   // Create an settings.ini file
   const std::string &lLogsPathFolder{
-      std::filesystem::path("LOGS/path/logs/PATH/Valid").c_str()};
+      std::filesystem::path("LOGS/path/logs/PATH/Valid")
+          .make_preferred()
+          .string()};
   std::map<std::string, std::string> pModules{
       {"Module_Library", "warning"},
   };
@@ -335,7 +337,11 @@ TEST_F(SettingsManagerTest,
   std::map<std::string, std::string> pModules{
       {"Module_Library", "warning"},
   };
-  CreateMockSettingsFile("LOGS/path/logs/PATH/Valid", "info", pModules);
+  const std::string &lLogsPathFolder{
+      std::filesystem::path("LOGS/path/logs/PATH/Valid")
+          .make_preferred()
+          .string()};
+  CreateMockSettingsFile(lLogsPathFolder, "info", pModules);
 
   Utilities::Settings::SettingsManager::GetInstance().LoadSettings();
 

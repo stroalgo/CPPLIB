@@ -141,7 +141,7 @@ class Settings {
    * @memberof Settings
    * @private
    */
-  std::map<const std::string_view, ModuleSettings> m_ModulesSettings{};
+  std::map<const std::string, ModuleSettings> m_ModulesSettings{};
 
   /**
    * @brief Create a default settings file
