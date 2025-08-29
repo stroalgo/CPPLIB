@@ -15,6 +15,7 @@
 
 #include <boost/log/trivial.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <cstdint>
 #include <map>
 #include <string>
 #include <string_view>
@@ -74,12 +75,21 @@ class Settings {
 
   /**
    * @brief Get the Module Log Level
-   *
+   * @memberof Settings
    * @param pModuleName Name of the module
    * @return The level of module logger
    */
   const boost::log::trivial::severity_level& GetSettingModuleLogLevel(
       const std::string& pModuleName);
+
+  /**
+   * @brief Get the Settings Server Port object
+   * @memberof Settings
+   * @return int
+   */
+  inline std::uint16_t GetSettingsServerPort() {
+    return m_ServerSettings.m_ServerPort;
+  };
 
   /**
    * @brief Check if module settings exist
@@ -142,6 +152,16 @@ class Settings {
    * @private
    */
   std::map<const std::string, ModuleSettings> m_ModulesSettings{};
+
+  /**
+   * @brief Struct to hold every settings related to server
+   * @memberof Settings
+   * @struct ServerSettings
+   * @private
+   */
+  struct ServerSettings {
+    std::uint16_t m_ServerPort{};
+  } m_ServerSettings;
 
   /**
    * @brief Create a default settings file

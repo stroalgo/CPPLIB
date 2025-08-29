@@ -9,6 +9,7 @@
 
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/regex.hpp>
+#include <cstdint>
 #include <filesystem>
 
 #include "Constants.h"
@@ -60,6 +61,11 @@ void Settings::CreateDefaultSettingsFile() {
     lModuleSettings.m_ModuleLogLevel = boost::log::trivial::trace;
     m_ModulesSettings[std::string(lModule)] = lModuleSettings;
   }
+
+  // Default server port
+  m_ServerSettings.m_ServerPort = Constants::c_DefaultServerPort;
+  lSettingsTree.put<std::uint16_t>("Server.Port",
+                                   Constants::c_DefaultServerPort);
 
   // Save default settings to file
   boost::property_tree::ini_parser::write_ini(std::string(m_SettingsFilePath),
@@ -119,6 +125,13 @@ void Settings::LoadSettings() {
         m_ModulesSettings.emplace(lModuleSettings.m_ModuleName,
                                   lModuleSettings);
       }
+    }
+
+    // Check and Populate Server port of ServerSettings struct
+    const std::uint16_t lServerPort{lSettingsTree.get<std::uint16_t>(
+        "Server.Port")};  // Default port 0 is invalid
+    if (lServerPort > 1024 && lServerPort < 65535) {
+      m_ServerSettings.m_ServerPort = lServerPort;
     }
 
     // Flag to indicate settings loaded successfully
