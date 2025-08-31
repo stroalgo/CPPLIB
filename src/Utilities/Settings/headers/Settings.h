@@ -161,7 +161,7 @@ class Settings {
    */
   struct ServerSettings {
     std::uint16_t m_ServerPort{};
-  } m_ServerSettings;
+  } m_ServerSettings{};
 
   /**
    * @brief Create a default settings file
