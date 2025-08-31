@@ -202,6 +202,7 @@ pipeline {
                 sh 'echo "Static C/C++ code analysis ===> CPPCHECK"'
                 sh 'cppcheck \
                     --enable=all  \
+                    -j 4 \
                     -v \
                     --language=c++ \
                     --suppress=missingIncludeSystem \
@@ -209,7 +210,9 @@ pipeline {
                     --std=c++17 \
                     --platform=win64 \
                     --xml \
-                    --xml-version=2  src 2> cppcheck.xml'
+                    --xml-version=2 \
+                    --project=build/$BuildType/compile_commands.json \
+                    2> cppcheck.xml'
 
                 sh 'echo "Static C/C++ code analysis ===> RATS"'
                 sh 'rats \
