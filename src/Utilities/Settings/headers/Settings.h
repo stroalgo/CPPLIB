@@ -49,7 +49,7 @@ class Settings {
    * @memberof Settings
    * @return const std::string&
    */
-  inline const std::string_view GetSettingsFilePath() {
+  inline const std::string_view GetSettingsFilePath() const {
     return m_SettingsFilePath;
   };
 
@@ -59,7 +59,7 @@ class Settings {
    * @return const std::string_view&
    * @public
    */
-  inline const std::string_view GetSettingLogPath() {
+  inline const std::string_view GetSettingLogPath() const {
     return m_LoggerSettings.m_SettingLogPath;
   };
 
@@ -69,7 +69,7 @@ class Settings {
    * @return const std::string_view&
    * @public
    */
-  inline const boost::log::trivial::severity_level& GetSettingLogLevel() {
+  inline const boost::log::trivial::severity_level& GetSettingLogLevel() const {
     return m_LoggerSettings.m_SettingLogLevel;
   };
 
@@ -87,7 +87,7 @@ class Settings {
    * @memberof Settings
    * @return int
    */
-  inline std::uint16_t GetSettingsServerPort() {
+  inline std::uint16_t GetSettingsServerPort() const {
     return m_ServerSettings.m_ServerPort;
   };
 

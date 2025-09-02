@@ -14,7 +14,7 @@ class LoggerException : public std::exception {
    *
    * @param pMessage Exception message
    */
-  LoggerException(const std::string &pMessage) : message(pMessage) {}
+  explicit LoggerException(const std::string &pMessage) : message(pMessage) {}
 
   /**
    * @brief Return the message related to the exception
