@@ -167,7 +167,7 @@ pipeline {
 
                 sh 'echo "Running Coverage Tests..."'
                 sh """ctest -V -T Coverage --test-dir build/${params.BuildType}"""
-                sh """gcovr --root src/ --filter .*/unitTest  --object-directory build/${params.BuildType} --cobertura-pretty --cobertura --print-summary  --output coverageTestsReports.xml"""
+                sh """gcovr --root src/ --filter src/ --exclude-directories .*/unitTest  --object-directory build/${params.BuildType} --cobertura-pretty --cobertura --print-summary  --output coverageTestsReports.xml"""
               }
               post {
                 success  {

@@ -12,9 +12,10 @@ function(add_static_library NAME VERSION)
   set_target_properties(${NAME} PROPERTIES VERSION ${VERSION} SOVERSION
                                                               ${SOVERSION})
 
-  # Code Coverage
-  if(CODE_COVERAGE)
-    add_code_coverage(${NAME})
+  # Add Code Coverage
+  if(IS_LINUX)
+    target_compile_options(${NAME} PRIVATE -fprofile-arcs -ftest-coverage)
+    target_link_options(${NAME} PRIVATE -fprofile-arcs -ftest-coverage)
   endif()
 
   # Install
@@ -47,9 +48,10 @@ function(add_shared_library NAME VERSION)
   set_target_properties(${NAME} PROPERTIES VERSION ${VERSION} SOVERSION
                                                               ${SOVERSION})
 
-  # Code Coverage
-  if(BUILD_WITH_CODE_COVERAGE)
-    # add_code_coverage(${NAME})
+  # Add Code Coverage
+  if(IS_LINUX)
+    target_compile_options(${NAME} PRIVATE -fprofile-arcs -ftest-coverage)
+    target_link_options(${NAME} PRIVATE -fprofile-arcs -ftest-coverage)
   endif()
 
   # Install binaries
@@ -82,9 +84,10 @@ function(add_interface_library NAME VERSION)
   set_target_properties(${NAME} PROPERTIES VERSION ${VERSION} SOVERSION
                                                               ${SOVERSION})
 
-  # Code Coverage
-  if(BUILD_WITH_CODE_COVERAGE)
-    # add_code_coverage(${NAME})
+  # Add Code Coverage
+  if(IS_LINUX)
+    target_compile_options(${NAME} INTERFACE -fprofile-arcs -ftest-coverage)
+    target_link_options(${NAME} INTERFACE -fprofile-arcs -ftest-coverage)
   endif()
 
   # Install Interfaces
