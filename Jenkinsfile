@@ -241,6 +241,7 @@ pipeline {
                       sh "${ScannerHomePath}/bin/sonar-scanner \
                           -Dsonar.sources=src \
                           -Dsonar.projectKey=cpplib \
+                          -Dsonar.exclusions=src/***/unitTest/*.cpp \
                           -Dsonar.cfamily.compile-commands=build/$BuildType/compile_commands.json \
                           -Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers \
                           -Dsonar.cxx.gcc.encoding=UTF-8  \
