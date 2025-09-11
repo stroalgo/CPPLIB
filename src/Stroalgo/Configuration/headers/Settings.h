@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef STROALGO_SETTINGS_HEADERS_SETTINGS_H_
-#define STROALGO_SETTINGS_HEADERS_SETTINGS_H_
+#ifndef STROALGO_CONFIGURATION_HEADERS_SETTINGS_H_
+#define STROALGO_CONFIGURATION_HEADERS_SETTINGS_H_
 
 #include <boost/log/trivial.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -22,7 +22,7 @@
 
 #include "GenericSingleton.h"
 
-namespace Stroalgo::Settings {
+namespace Stroalgo::Configuration {
 
 /**
  * @brief Class to represent every settings that will be used by the application
@@ -221,6 +221,6 @@ class SettingsManager : public Stroalgo::Common::GenericSingleton<Settings> {
   SettingsManager() = default;
 };
 
-}  // namespace Stroalgo::Settings
+}  // namespace Stroalgo::Configuration
 
-#endif  // STROALGO_SETTINGS_HEADERS_SETTINGS_H_
+#endif  // STROALGO_CONFIGURATION_HEADERS_SETTINGS_H_

@@ -15,7 +15,7 @@
 #include "Constants.h"
 #include "Exceptions.h"
 
-namespace Stroalgo::Settings {
+namespace Stroalgo::Configuration {
 
 bool Settings::IsModuleSettingsLoaded(const std::string& pModuleName) {
   bool lRet{};
@@ -142,4 +142,4 @@ void Settings::LoadSettings() {
     CreateDefaultSettingsFile();
   }
 }
-}  // namespace Stroalgo::Settings
+}  // namespace Stroalgo::Configuration
