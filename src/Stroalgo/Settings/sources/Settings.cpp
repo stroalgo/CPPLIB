@@ -15,7 +15,7 @@
 #include "Constants.h"
 #include "Exceptions.h"
 
-namespace Utilities::Settings {
+namespace Stroalgo::Settings {
 
 bool Settings::IsModuleSettingsLoaded(const std::string& pModuleName) {
   bool lRet{};
@@ -35,7 +35,7 @@ const boost::log::trivial::severity_level& Settings::GetSettingModuleLogLevel(
     return lIt->second.m_ModuleLogLevel;
   } else {
     // throw Utilities::Exceptions::ModuleSettingsNotFound(
-    throw Utilities::Exceptions::LoggerException(
+    throw Stroalgo::Exceptions::LoggerException(
         "Module settings not found for module: " + pModuleName);
   }
 }
@@ -142,4 +142,4 @@ void Settings::LoadSettings() {
     CreateDefaultSettingsFile();
   }
 }
-}  // namespace Utilities::Settings
+}  // namespace Stroalgo::Settings

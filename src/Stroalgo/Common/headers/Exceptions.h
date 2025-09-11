@@ -1,7 +1,20 @@
+/**
+ * @file        Exceptions.h
+ * @author      ALLOGHO
+ * @brief       All exceptions class used in the library
+ * @version     1.0
+ * @date        2025-07-18
+ * @copyright   Copyright (c) 2025 stroalgo.corp
+ *
+ */
+
+#ifndef STROALGO_COMMON_HEADERS_EXCEPTIONS_H_
+#define STROALGO_COMMON_HEADERS_EXCEPTIONS_H_
+
 #include <exception>
 #include <string>
 
-namespace Utilities::Exceptions {
+namespace Stroalgo::Exceptions {
 /**
  * @brief Class to handle Logger exception
  @todo: change to  AppException as template maybe
@@ -32,4 +45,6 @@ class LoggerException : public std::exception {
   const std::string &message;
 };
 
-}  // namespace Utilities::Exceptions
+}  // namespace Stroalgo::Exceptions
+
+#endif  // CPPLIB_COMMON_HEADERS_EXCEPTIONS_H_
