@@ -6,7 +6,10 @@ pipeline {
   parameters{
 
       //Enable Valgrind
-      booleanParam(name:'valgrind', defaultValue: false, description:'Enable Valgrind for profiling Memory/Leak')
+      booleanParam(name:'Valgrind', defaultValue: true, description:'Enable Valgrind for profiling Memory/Leak')
+
+      //Enable Valgrind
+      booleanParam(name:'Documentation', defaultValue: true, description:'Enable Doc Generation')
 
       //Build Type
       //The FIRST item in the choices array becomes the default
@@ -107,12 +110,16 @@ pipeline {
                 sh 'echo "Configuring..."'
                 script
                 {
-                  if (params.valgrind) {
-                    sh 'cmake -DBUILD_WITH_MEMCHECK_VAL=ON --preset conan-$buildTypeLower'
+                  def buildOptions = " "
+                  if (params.Valgrind) {
+                    buildOptions += " -DBUILD_WITH_MEMCHECK_VAL=ON "
                   }
-                  else {
-                    sh 'cmake --preset conan-$buildTypeLower'
+
+                  if (params.Documentation) {
+                    buildOptions += " -DBUILD_WITH_DOC=ON "
                   }
+                  sh "cmake  ${buildOptions} --preset conan-$buildTypeLower"
+
                 }
               }
             }
@@ -122,7 +129,15 @@ pipeline {
               steps
               {
                 bat 'echo "Configuring..."'
-                bat 'cmake --preset conan-default'
+                script
+                {
+                  def buildOptions = " "
+                  if (params.Documentation) {
+                    buildOptions += " -DBUILD_WITH_DOC=ON "
+                  }
+                  bat "cmake  ${buildOptions} --preset conan-default"
+                }
+
               }
             }
           }
