@@ -6,10 +6,13 @@ pipeline {
   parameters{
 
       //Enable Valgrind
-      booleanParam(name:'Valgrind', defaultValue: true, description:'Enable Valgrind for profiling Memory/Leak')
+      booleanParam(name:'Valgrind', defaultValue: false, description:'Enable Valgrind for profiling Memory/Leak')
 
-      //Enable Valgrind
-      booleanParam(name:'Documentation', defaultValue: true, description:'Enable Doc Generation')
+      //Enable Documentation
+      booleanParam(name:'Documentation', defaultValue: false, description:'Enable Doc Generation')
+
+      //Enable Run Units Tests
+      booleanParam(name:'UnitsTests', defaultValue: true, description:'Enable UnitsTests Run')
 
       //Build Type
       //The FIRST item in the choices array becomes the default
@@ -171,6 +174,9 @@ pipeline {
 
         stage('Run UnitTests')
         {
+          when {
+                expression { params.UnitsTests }
+            }
           parallel
           {
             stage("Linux Platform")
