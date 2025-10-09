@@ -34,7 +34,7 @@ class LoggerException : public std::exception {
    *
    * @return Exception message
    */
-  const char *what() { return message.c_str(); }
+  const char *what() const noexcept override { return message.c_str(); }
 
  private:
   /**
