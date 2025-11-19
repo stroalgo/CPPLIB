@@ -4,20 +4,29 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
   add_compile_options(
     -O3 # Optimize for speed
     -ffast-math # Enable fast math optimizations
-    -fstack-protector-strong # Generate extra code to check for buffer overflows
-    -fstrict-aliasing # Assume the strictest aliasing rules
     -fstrict-enums # Assume that enumerations do not overflow
-    -fstrict-overflow # Assume that signed arithmetic does not overflow
     -fstrict-return # Assume that functions with non-void return types always
                     # return a value
+    -fstrict-overflow # Assume that signed arithmetic does not overflow
+    -fstrict-aliasing # Assume the strict aliasing rules
+    -fstack-protector-strong # Generate extra code to check for buffer overflows
     -fstrict-vtable-pointers # Optimize based on the assumption that vtable
-                             # pointers are not modified
-    -flto=full # Number of partitions to use for parallel full LTO codegen
+    # # pointers are not modified
+    -flto=full # Enables Link Time Optimization.at link time the linker (or the
+               # compiler driver invoking the linker plugin) performs
+               # whole-program optimizations such as cross-translation-unit
+               # inlining, dead-code elimination, devirtualization and better
+               # constant propagation. This can lead to significant performance
+               # improvements in the final executable.
     -fvirtual-function-elimination # Enables dead virtual function elimination
                                    # optimization
+    -fwhole-program-vtables # It allows the compiler to make more aggressive
+                            # optimizations regarding virtual function dispatch
+                            # when it can see the entire program's code.
     -fforce-emit-vtables # It causes more inline virtual functions to be
                          # emitted.
   )
+  add_link_options(-flto=full)
   message("🟢 CLANG RELEASE Compile options added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
@@ -81,12 +90,12 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     -fsanitize=integer-divide-by-zero # Detect integer division by zero
     -fsanitize-cfi-cross-dso # Enable CFI protection across shared objects
     -fsanitize-stats # Collect and display sanitizer statistics
-    # USE of memory sanitizer ==> -fsanitize=memory # -fmemory-profile # Enable
-    # heap memory profiling -fsanitize-memory-param-retval # Run MemorySanitizer
-    # on function parameters and return values -fsanitize-memory-track-origins #
-    # Run MemorySanitizer with origin tracking USE of thread sanitizer ==>
-    # -fsanitize=thread -fsanitize=thread -fcoroutines # Enable support for C++
-    # coroutines ==> allow in c++20
+    # TODO USE of memory sanitizer ==> -fsanitize=memory # -fmemory-profile #
+    # Enable heap memory profiling -fsanitize-memory-param-retval # Run
+    # MemorySanitizer on function parameters and return values
+    # -fsanitize-memory-track-origins # Run MemorySanitizer with origin tracking
+    # TODO USE of thread sanitizer ==> -fsanitize=thread -fsanitize=thread
+    # -fcoroutines # Enable support for C++ coroutines ==> allow in c++20
   )
 
   message("🟢 CLANG DEBUG Compile options added")
