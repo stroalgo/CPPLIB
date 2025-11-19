@@ -9,10 +9,15 @@
 				"install",
 				".",
 				"--build=missing",
-				"-sbuild_type=Debug"
+				"-sbuild_type=Debug",
+				"--profile=ConanProfiles/${input:profile}",
+				"-v"
 			],
 			"options": {
-				"cwd": "${workspaceFolder}"
+				"cwd": "${workspaceFolder}",
+				 "env": {
+                    "PATH": "${env:HOME}/.pyenv/versions/3.12.8/bin/:${env:PATH}"
+                }
 			},
 			"group": "build",
 			"problemMatcher": []
@@ -25,10 +30,15 @@
 				"install",
 				".",
 				"--build=missing",
-				"-sbuild_type=Release"
+				"-sbuild_type=Release",
+				"--profile=ConanProfiles/${input:profile}",
+				"-v"
 			],
 			"options": {
-				"cwd": "${workspaceFolder}"
+				"cwd": "${workspaceFolder}",
+				 "env": {
+					"PATH": "${env:HOME}/.pyenv/versions/3.12.8/bin/:${env:PATH}"
+				}
 			},
 			"group": "build",
 			"problemMatcher": []
@@ -41,14 +51,40 @@
 				"install",
 				".",
 				"--build=missing",
-				"-s &:build_type=RelWithDebInfo",
-				"-sbuild_type=Release"
+				"-sbuild_type=RelWithDebInfo",
+				"--profile=ConanProfiles/${input:profile}",
+				"-v"
 			],
 			"options": {
-				"cwd": "${workspaceFolder}"
+				"cwd": "${workspaceFolder}",
+				 "env": {
+					"PATH": "${env:HOME}/.pyenv/versions/3.12.8/bin/:${env:PATH}"
+				}
 			},
 			"group": "build",
 			"problemMatcher": []
+		},
+	],
+	"inputs": [
+		{
+			"id": "profile",
+			"type": "pickString",
+			"description": "Conan profile to use",
+			"options": [
+				{
+					"label": "Conan Clang Profile",
+					"value": "ClangProfile"
+				},
+				{
+					"label": "Conan GCC Profile",
+					"value": "GccProfile"
+				},
+				{
+					"label": "Conan MSVC Profile",
+					"value": "MsvcProfile"
+				}
+			],
+			"default": "GccProfile"
 		},
 	]
 }
