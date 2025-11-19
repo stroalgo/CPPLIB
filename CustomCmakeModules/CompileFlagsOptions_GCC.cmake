@@ -26,9 +26,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     -ftracer # instrumentation for tracer hooks (GCC internal)
     -fstdarg-opt # optimize varargs usage
     -fstack-clash-protection # mitigate stack clash attacks
-    # Available in GNU plateform -fprofile-use            # use profile data to
-    # guide optimizations (requires .gcda/.gcno) -fsection-anchors       # keep
-    # section anchors to help with dead-stripping
   )
   message("🟢 GCC RELEASE options Flags added")
 
@@ -47,7 +44,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     -fmem-report # emit memory usage report (GCC-specific)
     -fstack-usage # produce stack usage info per function
     -fstats # emit compiler statistics
-    # -Q  N.B: Build is too long
   )
   message("🟢 GCC RELEASE WITH DEBUG INFO options Flags added")
 
@@ -75,9 +71,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     -fstack-usage # report stack usage per function
     -fstats # emit compiler stats
     -fsanitize=pointer-overflow # detect pointer arithmetic overflow
-    # --coverage -Q  N.B: Build is too long Available in GNU plateform -pg #
-    # compile for gprof profiling -p                       # compile for basic
-    # profiling
   )
   message("🟢 GCC DEBUG options Flags added")
 endif()
@@ -155,7 +148,6 @@ add_compile_options(
   -Wmissing-attributes # warn about missing function/variable attributes
   -Wswitch-default # warn if switch has no default label
   -Wunused-parameter # warn about unused function parameters
-  -Wuninitialized # duplicate: warn about uninitialized variables
   -Wduplicated-branches # warn about duplicated branches in conditionals
   -Wduplicated-cond # warn about duplicated conditions
   -Wzero-length-bounds # warn when bounds are length zero
