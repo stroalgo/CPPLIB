@@ -82,6 +82,28 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("🟢 GCC DEBUG options Flags added")
 endif()
 
+# ---------------------------------------------------------Common Sanitizer
+# Flags--------------------------------------------------------
+set(COMMON_SANITIZER_FLAGS
+    -fsanitize=signed-integer-overflow # link-time sanitizer for signed integer
+                                       # overflow
+    -fsanitize=null # detect null dereferences
+    -fsanitize=vptr # detect invalid virtual pointer uses (C++ vtables)
+    -fsanitize=object-size # check object size-related errors
+    -fsanitize=float-divide-by-zero # detect floating-point divide-by-zero
+    -fsanitize=float-cast-overflow # detect floating-point cast overflow
+    -fsanitize=nonnull-attribute # check nonnull attribute violations
+    -fsanitize=returns-nonnull-attribute # check functions marked
+                                         # returns_nonnull
+    -fsanitize=bool # boolean sanitizer checks
+    -fsanitize=enum # enum sanitizer checks
+    -fsanitize=builtin # builtin function checks
+    -fsanitize-address-use-after-scope # detect use-after-scope for local
+                                       # variables
+    -fsanitize-coverage=trace-cmp # enable sanitizer coverage for comparison
+                                  # tracing
+)
+
 # ---------------------------------------------------------Compile Link
 # options--------------------------------------------------------
 add_link_options(
@@ -93,23 +115,7 @@ add_link_options(
   -ffunction-sections # put each function in its own section (enables
                       # dead-stripping)
   -fdata-sections # put each data item in its own section
-  -fsanitize=signed-integer-overflow # link-time sanitizer for signed integer
-                                     # overflow
-  -fsanitize=null # detect null dereferences
-  -fsanitize=vptr # detect invalid virtual pointer uses (C++ vtables)
-  -fsanitize=object-size # check object size-related errors
-  -fsanitize=float-divide-by-zero # detect floating-point divide-by-zero
-  -fsanitize=float-cast-overflow # detect floating-point cast overflow
-  -fsanitize=nonnull-attribute # check nonnull attribute violations
-  -fsanitize=returns-nonnull-attribute # check functions marked returns_nonnull
-  -fsanitize=bool # boolean sanitizer checks
-  -fsanitize=enum # enum sanitizer checks
-  -fsanitize=builtin # builtin function checks
-  -fsanitize-address-use-after-scope # detect use-after-scope for local
-                                     # variables
-  -fsanitize-coverage=trace-cmp # enable sanitizer coverage for comparison
-                                # tracing
-)
+  ${COMMON_SANITIZER_FLAGS})
 
 # ---------------------------------------------------------Common Compile
 # options--------------------------------------------------------
@@ -177,6 +183,14 @@ add_compile_options(
   -fdiagnostics-show-option # show which option enabled a diagnostic (useful for
                             # analysis)
   -fstack-protector # protect against stack smashing
+  -fcf-protection=full # enable control flow protection (spectre/ret2
+  # mitigations)
+  -fharden-compares # harden integer comparisons against overflow attacks
+  -fharden-conditional-branches # harden conditional branches
+  -fstack-protector-strong # stronger stack protector (more functions protected)
+  -fexceptions # enable exception handling
+  -fdelete-dead-exceptions # remove exceptions that are provably dead
+  -ftrampolines # allow trampolines for nested functions
   -fsanitize=shift # detect undefined shift operations
   -fsanitize=shift-exponent # detect invalid shift exponent
   -fsanitize=shift-base # detect invalid shift base
@@ -184,30 +198,8 @@ add_compile_options(
   -fsanitize=bounds-strict # strict bounds checking
   -fsanitize=vla-bound # detect variable length array bound issues
   -fsanitize=return # check for returning address of local object
-  -fsanitize=signed-integer-overflow # detect signed integer overflow
-  -fsanitize=null # detect null dereferences
-  -fsanitize=vptr # detect vptr misuse (C++ RTTI/vtable problems)
-  -fsanitize=object-size # object size checks for buffer overflows
-  -fsanitize=float-divide-by-zero # detect float divide-by-zero
-  -fsanitize=float-cast-overflow # detect float cast overflow
-  -fsanitize=nonnull-attribute # check nonnull attribute violations
-  -fsanitize=returns-nonnull-attribute # check returns_nonnull violations
-  -fsanitize=bool # boolean sanitizer checks
-  -fsanitize=enum # enum sanitizer checks
-  -fsanitize=builtin # checks for builtin functions
-  -fsanitize-address-use-after-scope # detect use-after-scope
-  -fsanitize-coverage=trace-cmp # coverage for comparison tracing
   -fsanitize=unreachable # detect unreachable code being executed
-  -fcf-protection=full # enable control flow protection (spectre/ret2
-                       # mitigations)
-  -fharden-compares # harden integer comparisons against overflow attacks
-  -fharden-conditional-branches # harden conditional branches
-  -fstack-protector-strong # stronger stack protector (more functions protected)
-  -fexceptions # enable exception handling
-  -fdelete-dead-exceptions # remove exceptions that are provably dead
-  -ftrampolines # allow trampolines for nested functions
-  # Precompiled Headers -x -fpreprocessed -fpch-preprocess -H
-)
+  ${COMMON_SANITIZER_FLAGS})
 
 # ---------------------------------------------------------Memory/Leak
 # Profiling--------------------------------------------------------
