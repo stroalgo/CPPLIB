@@ -32,6 +32,7 @@ option(BUILD_WITH_MEMCHECK_VAL
        "Add a valgrind memory/leak check for each units tests" OFF)
 option(BUILD_WITH_DOC "Generate Documentation" OFF)
 option(BUILD_WITH_CLANG "Build with Clang Compiler" OFF)
+option(BUILD_WITH_DEEP_DIVE_DEBUG_MODE "Deep-Dive Debugging Compilation" OFF)
 
 # ---------------------------------------------------------Language/Build--------------------------------------------------------
 # C Settings

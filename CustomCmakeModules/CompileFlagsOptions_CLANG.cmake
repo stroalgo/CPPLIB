@@ -55,9 +55,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     -fdiagnostics-color=always # Enable colors in diagnostics
     -fdiagnostics-show-line-numbers # Show line numbers in diagnostics
     -fdiagnostics-show-note-include-stack # Show include stack in diagnostics
-    -fshow-skipped-includes # Show skipped includes
-    --save-stats # Save frontend statistics
-    -fverify-intermediate-code # Verify the correctness of LLVM IR
     -fdebug-macro # Emit macros in debug info
     -fforce-dwarf-frame # Force emission of DWARF frame information
     -fstandalone-debug # Generate debug info for all types, even if unreferenced
@@ -65,19 +62,29 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     --verbose # Give verbose output about the build process
   )
 
+  if(BUILD_WITH_DEEP_DIVE_DEBUG_MODE)
+    message("🟢 DEEP DIVE IN DEBUG TYPE BUILD enabled")
+    add_compile_options(
+      -fshow-skipped-includes # Show skipped includes
+      --save-stats # Save frontend statistics
+      -fverify-intermediate-code # Verify the correctness of LLVM IR
+      --trace-includes # Trace header includes
+    )
+  endif()
+
   # ---------------------------------------------------------Compile Link
   # options--------------------------------------------------------
   add_link_options(
     -shared-libasan # AddressSanitizer
-    -shared-libsan # AddressSanitizer, MemorySanitizer, ThreadSanitizer,
-                   # UndefinedBehaviorSanitizer
-    -fsanitize-link-c++-runtime # Link the C++ runtime with -fsanitize
+    -shared-libsan # AddressSanitizer, MemorySanitizer,
+                   # ThreadSanitizer,UndefinedBehaviorSanitizer
     -fsanitize=address # Enable AddressSanitizer
   )
 
   # ---------------------------------------------------------Sanitize Compile
   # options--------------------------------------------------------
   add_compile_options(
+    -fsanitize-link-c++-runtime # Link the C++ runtime with -fsanitize
     -fsanitize=address # Enable AddressSanitizer
     -fsanitize=undefined # Enable UndefinedBehaviorSanitizer
     -fsanitize=leak # Enable LeakSanitizer
