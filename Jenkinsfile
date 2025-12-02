@@ -14,6 +14,9 @@ pipeline {
       //Enable Run Units Tests
       booleanParam(name:'UnitsTests', defaultValue: true, description:'Enable UnitsTests Run')
 
+      //Build With CLANG
+      booleanParam(name:'Clang', defaultValue: false, description:'Use CLANG Compiler for linux Plateform')
+
       //Build Type
       //The FIRST item in the choices array becomes the default
       choice(name:'BuildType', choices:'Debug\nRelease\nRelWithDebInfo',description:'Which type of build to consider?')
@@ -56,11 +59,19 @@ pipeline {
 
                   sh 'echo "Loading..."'
                   script {
-                              if (params.BuildType== 'RelWithDebInfo') {
-                                sh """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
+                              def compilerProfile = " "
+                              if (params.Clang) {
+                                compilerProfile = "ConanProfiles/ClangProfile"
                               }
                               else {
-                                sh """conan install . -sbuild_type=${params.BuildType} --build=missing"""
+                                compilerProfile = "ConanProfiles/GccProfile"
+                              }
+
+                              if (params.BuildType== 'RelWithDebInfo') {
+                                sh """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release --profile=${compilerProfile}"""
+                              }
+                              else {
+                                sh """conan install . -sbuild_type=${params.BuildType} --build=missing  --profile=${compilerProfile}"""
                               }
                           }
 
@@ -90,10 +101,10 @@ pipeline {
                   echo "Loading..."
                   script {
                               if (params.BuildType == 'RelWithDebInfo') {
-                                bat """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release"""
+                                bat """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release --profile=ConanProfiles/MsvcProfile"""
                               }
                               else {
-                                bat """conan install . -sbuild_type=${params.BuildType} --build=missing"""
+                                bat """conan install . -sbuild_type=${params.BuildType} --build=missing  --profile=ConanProfiles/MsvcProfile"""
                               }
                           }
                 }
@@ -221,7 +232,7 @@ pipeline {
               steps
               {
                 sh 'echo "Static C/C++ code analysis ===> CPPCHECK"'
-                sh 'cppcheck \
+                sh """cppcheck \
                     --enable=all  \
                     -j 4 \
                     -v \
@@ -232,8 +243,8 @@ pipeline {
                     --platform=win64 \
                     --xml \
                     --xml-version=2 \
-                    --project=build/$BuildType/compile_commands.json \
-                    2> cppcheck.xml'
+                    --project=build/${params.BuildType}/compile_commands.json \
+                    2> cppcheck.xml"""
 
                 sh 'echo "Static C/C++ code analysis ===> RATS"'
                 sh 'rats \
@@ -244,15 +255,15 @@ pipeline {
 
 
                 sh 'echo "Static C/C++ code analysis ===> CLANG"'
-                sh 'cd build/$BuildType && scan-build \
+                sh """cd build/${params.BuildType} && scan-build \
                     -plist \
                     -analyze-headers \
-                    -o clang_reports make'
+                    -o clang_reports make"""
 
                 sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'
                 catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', message: 'Skip in case of cmd failure')
                 {
-                  sh 'cd build/$BuildType && run-clang-tidy > clang-tidy.txt'
+                  sh """cd build/${params.BuildType} && run-clang-tidy > clang-tidy.txt"""
                 }
 
                 unstash 'win_build'
@@ -263,7 +274,7 @@ pipeline {
                           -Dsonar.sources=src \
                           -Dsonar.projectKey=cpplib \
                           -Dsonar.exclusions=src/***/unitTest/*.cpp \
-                          -Dsonar.cfamily.compile-commands=build/$BuildType/compile_commands.json \
+                          -Dsonar.cfamily.compile-commands=build/${params.BuildType}/compile_commands.json \
                           -Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers \
                           -Dsonar.cxx.gcc.encoding=UTF-8  \
                           -Dsonar.cxx.gcc.reportPaths=lin_build.log \
@@ -272,9 +283,9 @@ pipeline {
                           -Dsonar.cxx.valgrind.reportPaths=build/${params.BuildType}/**/*_test_valgrind.xml \
                           -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
                           -Dsonar.cxx.rats.reportPaths=rats.xml \
-                          -Dsonar.cxx.clangsa.reportPaths=build/$BuildType/clang_reports/*/*.plist \
-                          -Dsonar.cxx.clangtidy.reportPaths=build/$BuildType/clang-tidy.txt \
-                          -Dsonar.cxx.xunit.reportPaths=build/$BuildType/unitTestReports.xml \
+                          -Dsonar.cxx.clangsa.reportPaths=build/${params.BuildType}/clang_reports/*/*.plist \
+                          -Dsonar.cxx.clangtidy.reportPaths=build/${params.BuildType}/clang-tidy.txt \
+                          -Dsonar.cxx.xunit.reportPaths=build/${params.BuildType}/unitTestReports.xml \
                           -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml  \
                           -Dsonar.qualitygate.wait=true \
                           -Dsonar.qualitygate.timeout=300 \
@@ -311,7 +322,7 @@ pipeline {
               steps
               {
                 bat 'echo "Packaging..."'
-                bat 'cd  build && cpack -C $BuildType'
+                bat """cd  build && cpack -C ${params.BuildType}"""
               }
               post
               {
@@ -348,7 +359,7 @@ pipeline {
                                 protocol: NEXUS_PROTOCOL,
                                 nexusUrl: NEXUS_URL,
                                 groupId: "org.stroalgo",
-                                version: "Linux-${BuildType}-${versionExtracted}",
+                                version: "Linux-${params.BuildType}-${versionExtracted}",
                                 repository: NEXUS_REPOSITORY,
                                 credentialsId: NEXUS_CREDENTIAL_ID,
                                 artifacts: [
@@ -393,7 +404,7 @@ pipeline {
                               protocol: NEXUS_PROTOCOL,
                               nexusUrl: "localhost:8081/",
                               groupId: "org.stroalgo",
-                              version: "Windows-${BuildType}-${versionExtracted}",
+                              version: "Windows-${params.BuildType}-${versionExtracted}",
                               repository: NEXUS_REPOSITORY,
                               credentialsId: NEXUS_CREDENTIAL_ID,
                               artifacts: [
