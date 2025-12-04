@@ -132,6 +132,10 @@ pipeline {
                   if (params.Documentation) {
                     buildOptions += " -DBUILD_WITH_DOC=ON "
                   }
+
+                  if (params.Clang) {
+                    buildOptions += " -DBUILD_WITH_CLANG=ON "
+                  }
                   sh "cmake  ${buildOptions} --preset conan-$buildTypeLower"
 
                 }
