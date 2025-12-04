@@ -54,10 +54,7 @@ pipeline {
                                                         "Executed on: ${NODE_NAME}\n"
                           }
 
-                  sh 'echo "create conan profile..."'
-                  sh 'conan profile detect --force'
-
-                  sh 'echo "Loading..."'
+                  sh 'echo "Load conan profile..."'
                   script {
                               def compilerProfile = " "
                               if (params.Clang) {
@@ -92,13 +89,9 @@ pipeline {
                               currentBuild.description = "Build Type: ${params.BuildType}\n"  +
                                                         "Branch Name: ${env.BRANCH_NAME}\n" +
                                                         "Executed on: ${NODE_NAME}\n"
-
                           }
 
-                  bat 'echo "create conan profile..."'
-                  bat 'conan profile detect --force'
-
-                  echo "Loading..."
+                  echo "Load conan profile..."
                   script {
                               if (params.BuildType == 'RelWithDebInfo') {
                                 bat """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release --profile=ConanProfiles/MsvcProfile"""
