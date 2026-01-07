@@ -181,8 +181,9 @@ function(add_unit_test NAME)
   find_package(GTest REQUIRED)
 
   # Add test framework link libraries/dependencies
-  target_link_libraries(${NAME}_test PRIVATE ${NAME} GTest::gtest
-                                             GTest::gtest_main ${ARGN})
+  target_link_libraries(
+    ${NAME}_test PRIVATE GTest::gtest GTest::gtest_main ${ARGN}
+                         -Wl,--whole-archive ${NAME} -Wl,--no-whole-archive)
 
   # Add Code Coverage
   if(IS_LINUX AND BUILD_WITH_TEST)
