@@ -194,9 +194,25 @@ pipeline {
                 sh 'echo "Running Unit Tests..."'
                 sh """ctest -V --build-config ${params.BuildType} --test-dir build/${params.BuildType} --output-junit  unitTestReports.xml"""
 
-                sh 'echo "Running Coverage Tests..."'
-                sh """ctest -V -T Coverage --test-dir build/${params.BuildType}"""
-                sh """gcovr --root src/ --filter src/ --exclude-directories .*/unitTest  --object-directory build/${params.BuildType} --cobertura-pretty --cobertura --print-summary  --output coverageTestsReports.xml"""
+                script
+                {
+                    sh 'echo "Running Coverage Tests..."'
+                    if (params.Clang)
+                    {
+                      sh """LLVM_PROFILE_FILE="../../../Profraw/test_%p.profraw" ctest  --test-dir build/${params.BuildType}"""
+                      sh """llvm-profdata merge -sparse  build/${params.BuildType}/Profraw/*.profraw -o coverageTests.profdata"""
+                      sh """llvm-cov export --format=lcov --instr-profile=coverageTests.profdata  --ignore-filename-regex=".*/unitTest/.*"  \$(find . -type f -executable -name "*_test") > lcov_exec.info"""
+                      sh """llvm-cov export --format=lcov --instr-profile=coverageTests.profdata   \$(find . -type -name "*.so") > lcov_lib.info"""
+                      sh """lcov -a lcov_exec.info -a lcov_lib.info -o coverageTestsReports.info"""
+                      sh """lcov_cobertura coverageTestsReports.info --output coverageTestsReports.xml"""
+                    }
+                    else
+                    {
+                      sh """ctest -V -T Coverage --test-dir build/${params.BuildType}"""
+                      sh """gcovr --root src/ --filter src/ --exclude-directories .*/unitTest  --object-directory build/${params.BuildType} --cobertura-pretty --cobertura --print-summary  --output coverageTestsReports.xml"""
+                    }
+                }
+
               }
               post {
                 success  {
@@ -283,7 +299,7 @@ pipeline {
                           -Dsonar.cxx.clangsa.reportPaths=build/${params.BuildType}/clang_reports/*/*.plist \
                           -Dsonar.cxx.clangtidy.reportPaths=build/${params.BuildType}/clang-tidy.txt \
                           -Dsonar.cxx.xunit.reportPaths=build/${params.BuildType}/unitTestReports.xml \
-                          -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml  \
+                          -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml \
                           -Dsonar.qualitygate.wait=true \
                           -Dsonar.qualitygate.timeout=300 \
                           -Dsonar.branchname=${env.BRANCH_NAME} \
