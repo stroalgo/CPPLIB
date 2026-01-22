@@ -11,19 +11,8 @@ function(add_static_library NAME VERSION)
   # Set target version
   set_target_properties(${NAME} PROPERTIES VERSION ${VERSION} SOVERSION
                                                               ${SOVERSION})
-
   # Add Code Coverage when Building with Unit Test
-  if(IS_LINUX AND BUILD_WITH_TEST)
-    if(BUILD_WITH_CLANG)
-      target_compile_options(${NAME} PRIVATE -fprofile-instr-generate
-                                             -fcoverage-mapping)
-      target_link_options(${NAME} PRIVATE -fprofile-instr-generate
-                          -fcoverage-mapping)
-    else()
-      target_compile_options(${NAME} PRIVATE -fprofile-arcs -ftest-coverage)
-      target_link_options(${NAME} PRIVATE -fprofile-arcs -ftest-coverage)
-    endif()
-  endif()
+  add_code_coverage(${NAME} PRIVATE)
 
   # Install
   install(
@@ -56,17 +45,7 @@ function(add_shared_library NAME VERSION)
                                                               ${SOVERSION})
 
   # Add Code Coverage when Building with Unit Test
-  if(IS_LINUX AND BUILD_WITH_TEST)
-    if(BUILD_WITH_CLANG)
-      target_compile_options(${NAME} PRIVATE -fprofile-instr-generate
-                                             -fcoverage-mapping)
-      target_link_options(${NAME} PRIVATE -fprofile-instr-generate
-                          -fcoverage-mapping)
-    else()
-      target_compile_options(${NAME} PRIVATE -fprofile-arcs -ftest-coverage)
-      target_link_options(${NAME} PRIVATE -fprofile-arcs -ftest-coverage)
-    endif()
-  endif()
+  add_code_coverage(${NAME} PRIVATE)
 
   # Install binaries
   install(
@@ -99,17 +78,7 @@ function(add_interface_library NAME VERSION)
                                                               ${SOVERSION})
 
   # Add Code Coverage when Building with Unit Test
-  if(IS_LINUX AND BUILD_WITH_TEST)
-    if(BUILD_WITH_CLANG)
-      target_compile_options(${NAME} INTERFACE -fprofile-instr-generate
-                                               -fcoverage-mapping)
-      target_link_options(${NAME} INTERFACE -fprofile-instr-generate
-                          -fcoverage-mapping)
-    else()
-      target_compile_options(${NAME} INTERFACE -fprofile-arcs -ftest-coverage)
-      target_link_options(${NAME} INTERFACE -fprofile-arcs -ftest-coverage)
-    endif()
-  endif()
+  add_code_coverage(${NAME} INTERFACE)
 
   # Install Interfaces
   install(
@@ -181,23 +150,17 @@ function(add_unit_test NAME)
   find_package(GTest REQUIRED)
 
   # Add test framework link libraries/dependencies
-  target_link_libraries(
-    ${NAME}_test PRIVATE GTest::gtest GTest::gtest_main ${ARGN}
-                         -Wl,--whole-archive ${NAME} -Wl,--no-whole-archive)
-
-  # Add Code Coverage
-  if(IS_LINUX AND BUILD_WITH_TEST)
-    if(BUILD_WITH_CLANG)
-      target_compile_options(${NAME}_test PRIVATE -fprofile-instr-generate
-                                                  -fcoverage-mapping)
-      target_link_options(${NAME}_test PRIVATE -fprofile-instr-generate
-                          -fcoverage-mapping)
-    else()
-      target_compile_options(${NAME}_test PRIVATE -fprofile-arcs
-                                                  -ftest-coverage)
-      target_link_options(${NAME}_test PRIVATE -fprofile-arcs -ftest-coverage)
-    endif()
+  if(IS_LINUX AND BUILD_WITH_CLANG)
+    target_link_libraries(
+      ${NAME}_test PRIVATE GTest::gtest GTest::gtest_main ${ARGN}
+                           -Wl,--whole-archive ${NAME} -Wl,--no-whole-archive)
+  else()
+    target_link_libraries(${NAME}_test PRIVATE GTest::gtest GTest::gtest_main
+                                               ${ARGN} ${NAME})
   endif()
+
+  # Add Code Coverage when Building with Unit Test
+  add_code_coverage(${NAME}_test PRIVATE)
 
   # Automatically add tests with CTest
   gtest_discover_tests(${NAME}_test XML_OUTPUT_DIR ./test_result/
@@ -229,6 +192,24 @@ function(memorycheck UNIT_TEST)
     endif()
   else()
     # Dr memory from windows
+  endif()
+endfunction()
+
+# -----------------------------------------------------------------------------
+# Function to enable coverage report generation
+# -----------------------------------------------------------------------------
+function(add_code_coverage TARGET_NAME SCOPE)
+  if(IS_LINUX AND BUILD_WITH_TEST)
+    if(BUILD_WITH_CLANG)
+      target_compile_options(${TARGET_NAME} ${SCOPE} -fprofile-instr-generate
+                             -fcoverage-mapping)
+      target_link_options(${TARGET_NAME} ${SCOPE} -fprofile-instr-generate
+                          -fcoverage-mapping)
+    else()
+      target_compile_options(${TARGET_NAME} ${SCOPE} -fprofile-arcs
+                             -ftest-coverage)
+      target_link_options(${TARGET_NAME} ${SCOPE} --coverage)
+    endif()
   endif()
 endfunction()
 
