@@ -15,7 +15,7 @@ pipeline {
       booleanParam(name:'UnitsTests', defaultValue: true, description:'Enable UnitsTests Run')
 
       //Build With CLANG
-      booleanParam(name:'Clang', defaultValue: false, description:'Use CLANG Compiler for linux Plateform')
+      booleanParam(name:'Clang', defaultValue: false, description:'Use Clang compiler for Linux platform')
 
       //Build Type
       //The FIRST item in the choices array becomes the default
@@ -56,20 +56,13 @@ pipeline {
 
                   sh 'echo "Load conan profile..."'
                   script {
-                              def compilerProfile = " "
-                              if (params.Clang) {
-                                compilerProfile = "ConanProfiles/ClangProfile"
-                              }
-                              else {
-                                compilerProfile = "ConanProfiles/GccProfile"
-                              }
-
-                              if (params.BuildType== 'RelWithDebInfo') {
-                                sh """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release --profile=${compilerProfile}"""
-                              }
-                              else {
-                                sh """conan install . -sbuild_type=${params.BuildType} --build=missing  --profile=${compilerProfile}"""
-                              }
+                            def compilerProfile = params.Clang ? "ConanProfiles/ClangProfile" : "ConanProfiles/GccProfile"
+                            if (params.BuildType== 'RelWithDebInfo') {
+                              sh """conan install .  --build=missing  -s "&:build_type=${params.BuildType}" -sbuild_type=Release --profile=${compilerProfile}"""
+                            }
+                            else {
+                              sh """conan install . -sbuild_type=${params.BuildType} --build=missing  --profile=${compilerProfile}"""
+                            }
                           }
 
                 }
@@ -199,10 +192,10 @@ pipeline {
                     sh 'echo "Running Coverage Tests..."'
                     if (params.Clang)
                     {
-                      sh """LLVM_PROFILE_FILE="../../../Profraw/test_%p.profraw" ctest  --test-dir build/${params.BuildType}"""
+                      sh """LLVM_PROFILE_FILE="build/${params.BuildType}/Profraw/test_%p.profraw" ctest  --test-dir build/${params.BuildType}"""
                       sh """llvm-profdata merge -sparse  build/${params.BuildType}/Profraw/*.profraw -o coverageTests.profdata"""
                       sh """llvm-cov export --format=lcov --instr-profile=coverageTests.profdata  --ignore-filename-regex=".*/unitTest/.*"  \$(find . -type f -executable -name "*_test") > lcov_exec.info"""
-                      sh """llvm-cov export --format=lcov --instr-profile=coverageTests.profdata   \$(find . -type -name "*.so") > lcov_lib.info"""
+                      sh """llvm-cov export --format=lcov --instr-profile=coverageTests.profdata   \$(find . -type f -name "*.so") > lcov_lib.info"""
                       sh """lcov -a lcov_exec.info -a lcov_lib.info -o coverageTestsReports.info"""
                       sh """lcov_cobertura coverageTestsReports.info --output coverageTestsReports.xml"""
                     }
