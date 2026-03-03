@@ -192,10 +192,21 @@ pipeline {
                     sh 'echo "Running Coverage Tests..."'
                     if (params.Clang)
                     {
-                      sh """LLVM_PROFILE_FILE="build/${params.BuildType}/Profraw/test_%p.profraw" ctest  --test-dir build/${params.BuildType}"""
-                      sh """llvm-profdata merge -sparse  build/${params.BuildType}/Profraw/*.profraw -o coverageTests.profdata"""
-                      sh """llvm-cov export --format=lcov --instr-profile=coverageTests.profdata  --ignore-filename-regex=".*/unitTest/.*"  \$(find . -type f -executable -name "*_test") > lcov_exec.info"""
-                      sh """llvm-cov export --format=lcov --instr-profile=coverageTests.profdata   \$(find . -type f -name "*.so") > lcov_lib.info"""
+                      sh "export LLVM_PROFILE_FILE=\"\${PWD}/build/${params.BuildType}/Profraw/test_%p.profraw\" && ctest --test-dir build/${params.BuildType}"
+                      sh """
+                        llvm-profdata merge -sparse build/${params.BuildType}/Profraw/*.profraw -o coverageTests.profdata
+                        # start fresh lcov output for executables
+                        > lcov_exec.info
+                        # loop over each unit test binary and append its coverage data
+                        for exe in \$(find . -type f -executable -name "*_test"); do
+                            echo "Exporting coverage for \$exe"
+                            llvm-cov export --format=lcov \\
+                                --instr-profile=coverageTests.profdata \\
+                                --ignore-filename-regex=".*/unitTest/.*" \\
+                                "\$exe" >> lcov_exec.info
+                        done
+                        """                      
+                      sh """llvm-cov export --format=lcov --instr-profile=coverageTests.profdata   \$(find \${PWD} -name "*.so") > lcov_lib.info"""
                       sh """lcov -a lcov_exec.info -a lcov_lib.info -o coverageTestsReports.info"""
                       sh """lcov_cobertura coverageTestsReports.info --output coverageTestsReports.xml"""
                     }
