@@ -17,6 +17,10 @@ pipeline {
       //Build With CLANG
       booleanParam(name:'Clang', defaultValue: false, description:'Use Clang compiler for Linux platform')
 
+      //Build Platform Selection
+      booleanParam(name:'LinuxBuild', defaultValue: true, description:'Enable Linux build stages')
+      booleanParam(name:'WindowsBuild', defaultValue: true, description:'Enable Windows build stages')
+
       //Build Type
       //The FIRST item in the choices array becomes the default
       choice(name:'BuildType', choices:'Debug\nRelease\nRelWithDebInfo',description:'Which type of build to consider?')
@@ -34,12 +38,30 @@ pipeline {
 
   stages
   {
+        stage('Validate Platform Selection')
+        {
+          steps {
+            script {
+              if (params.LinuxBuild && !params.WindowsBuild) {
+                echo "🟠WARNING: Windows build is disabled. This run will build/test/package only for Linux."
+              } else if (!params.LinuxBuild && params.WindowsBuild) {
+                echo "🟠WARNING: Linux build is disabled. This run will build/test/package only for Windows."
+              }
+
+              if (!params.LinuxBuild && !params.WindowsBuild) {
+                error "🔴Error: At least one platform (Linux or Windows) must be enabled."
+              }
+            }
+          }
+        }
+
         stage('Load Dependencies')
         {
           parallel
           {
             stage("Linux Platform")
             {
+                when { expression { params.LinuxBuild } }
                 agent { label 'Docker-Agent-Linux'}
                 steps
                 {
@@ -70,6 +92,7 @@ pipeline {
 
             stage("Windows Platform")
             {
+              when { expression { params.WindowsBuild } }
               agent { label 'Physical-Agent-Windows'}
               steps
                 {
@@ -104,6 +127,7 @@ pipeline {
           {
             stage("Linux Platform")
             {
+              when { expression { params.LinuxBuild } }
               agent { label 'Docker-Agent-Linux'}
               steps
               {
@@ -129,6 +153,7 @@ pipeline {
             }
             stage("Windows Platform")
             {
+              when { expression { params.WindowsBuild } }
               agent { label 'Physical-Agent-Windows'}
               steps
               {
@@ -153,6 +178,7 @@ pipeline {
           {
             stage("Linux Platform")
             {
+              when { expression { params.LinuxBuild } }
               agent { label 'Docker-Agent-Linux'}
               steps
               {
@@ -162,6 +188,7 @@ pipeline {
             }
             stage("Windows Platform")
             {
+              when { expression { params.WindowsBuild } }
               agent { label 'Physical-Agent-Windows'}
               steps
               {
@@ -182,6 +209,7 @@ pipeline {
           {
             stage("Linux Platform")
             {
+              when { expression { params.LinuxBuild } }
               agent { label 'Docker-Agent-Linux'}
               steps {
                 sh 'echo "Running Unit Tests..."'
@@ -227,6 +255,7 @@ pipeline {
 
             stage("Windows Platform")
             {
+              when { expression { params.WindowsBuild } }
               agent { label 'Physical-Agent-Windows'}
               steps {
                 bat 'echo "Running Unit Tests..."'
@@ -244,6 +273,7 @@ pipeline {
 
         stage('SonarQube')
         {
+              when { expression { params.LinuxBuild } }
               agent { label 'Docker-Agent-Linux'}
               environment { ScannerHomePath = tool 'SonarScanner'}
               steps
@@ -283,31 +313,37 @@ pipeline {
                   sh """cd build/${params.BuildType} && run-clang-tidy > clang-tidy.txt"""
                 }
 
-                unstash 'win_build'
                 script
-                {
+                {               
+                    def sonarArgs = [
+                          "-Dsonar.sources=src",
+                          "-Dsonar.projectKey=cpplib",
+                          "-Dsonar.exclusions=src/***/unitTest/*.cpp",
+                          "-Dsonar.cfamily.compile-commands=build/${params.BuildType}/compile_commands.json",
+                          "-Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers",
+                          "-Dsonar.cxx.gcc.encoding=UTF-8 ",
+                          "-Dsonar.cxx.gcc.reportPaths=lin_build.log",
+                          "-Dsonar.cxx.vc.encoding=UTF-8",
+                          "-Dsonar.cxx.valgrind.reportPaths=build/${params.BuildType}/**/*_test_valgrind.xml",
+                          "-Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml",
+                          "-Dsonar.cxx.rats.reportPaths=rats.xml",
+                          "-Dsonar.cxx.clangsa.reportPaths=build/${params.BuildType}/clang_reports/*/*.plist",
+                          "-Dsonar.cxx.clangtidy.reportPaths=build/${params.BuildType}/clang-tidy.txt",
+                          "-Dsonar.cxx.xunit.reportPaths=build/${params.BuildType}/unitTestReports.xml",
+                          "-Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml",
+                          "-Dsonar.qualitygate.wait=true",
+                          "-Dsonar.qualitygate.timeout=300",
+                          "-Dsonar.branchname=${env.BRANCH_NAME}",
+                          "-Dsonar.verbose=true" 
+                    ]
+
+                    if (params.WindowsBuild) {                    
+                      unstash 'win_build'                    
+                      sonarArgs << "-Dsonar.cxx.vc.reportPaths=win_build.log"
+                    }                   
+
                     withSonarQubeEnv('sonarqube_cpplib') {
-                      sh "${ScannerHomePath}/bin/sonar-scanner \
-                          -Dsonar.sources=src \
-                          -Dsonar.projectKey=cpplib \
-                          -Dsonar.exclusions=src/***/unitTest/*.cpp \
-                          -Dsonar.cfamily.compile-commands=build/${params.BuildType}/compile_commands.json \
-                          -Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers \
-                          -Dsonar.cxx.gcc.encoding=UTF-8  \
-                          -Dsonar.cxx.gcc.reportPaths=lin_build.log \
-                          -Dsonar.cxx.vc.encoding=UTF-8 \
-                          -Dsonar.cxx.vc.reportPaths=win_build.log \
-                          -Dsonar.cxx.valgrind.reportPaths=build/${params.BuildType}/**/*_test_valgrind.xml \
-                          -Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml \
-                          -Dsonar.cxx.rats.reportPaths=rats.xml \
-                          -Dsonar.cxx.clangsa.reportPaths=build/${params.BuildType}/clang_reports/*/*.plist \
-                          -Dsonar.cxx.clangtidy.reportPaths=build/${params.BuildType}/clang-tidy.txt \
-                          -Dsonar.cxx.xunit.reportPaths=build/${params.BuildType}/unitTestReports.xml \
-                          -Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml \
-                          -Dsonar.qualitygate.wait=true \
-                          -Dsonar.qualitygate.timeout=300 \
-                          -Dsonar.branchname=${env.BRANCH_NAME} \
-                          -Dsonar.verbose=true "
+                      sh "${ScannerHomePath}/bin/sonar-scanner ${sonarArgs.join(' ')}"
                     }
                 }
               }
@@ -319,6 +355,7 @@ pipeline {
           {
             stage("Linux Platform")
             {
+              when { expression { params.LinuxBuild } }
               agent { label 'Docker-Agent-Linux'}
               steps
               {
@@ -335,6 +372,7 @@ pipeline {
             }
             stage("Windows Platform")
             {
+              when { expression { params.WindowsBuild } }
               agent { label 'Physical-Agent-Windows'}
               steps
               {
@@ -358,6 +396,7 @@ pipeline {
           {
             stage("Linux Platform")
             {
+              when { expression { params.LinuxBuild } }
               agent { label 'Docker-Agent-Linux'}
                 steps {
                     script {
@@ -400,6 +439,7 @@ pipeline {
             }
             stage("Windows Platform")
             {
+              when { expression { params.WindowsBuild } }
               agent { label 'Physical-Agent-Windows'}
               steps
                {
