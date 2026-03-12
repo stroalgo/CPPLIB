@@ -42,14 +42,27 @@ pipeline {
         {
           steps {
             script {
-              if (params.LinuxBuild && !params.WindowsBuild) {
+              if (!params.LinuxBuild && !params.WindowsBuild) {
+                error "🔴Error: At least one platform (Linux or Windows) must be enabled."
+              } else if (params.LinuxBuild && !params.WindowsBuild) {
                 echo "🟠WARNING: Windows build is disabled. This run will build/test/package only for Linux."
               } else if (!params.LinuxBuild && params.WindowsBuild) {
                 echo "🟠WARNING: Linux build is disabled. This run will build/test/package only for Windows."
               }
 
-              if (!params.LinuxBuild && !params.WindowsBuild) {
-                error "🔴Error: At least one platform (Linux or Windows) must be enabled."
+            }
+          }
+        }
+         stage('Style & Syntax Check')
+        {
+          when { expression { params.LinuxBuild || params.WindowsBuild } }
+          agent { label "${params.LinuxBuild ? 'Docker-Agent-Linux' : 'Physical-Agent-Windows'}" }
+          steps {
+            script {
+              if (params.LinuxBuild) {
+                sh 'pre-commit run --all-files'
+              } else {
+                bat 'pre-commit run --all-files'
               }
             }
           }
@@ -233,7 +246,7 @@ pipeline {
                                 --ignore-filename-regex=".*/unitTest/.*" \\
                                 "\$exe" >> lcov_exec.info
                         done
-                        """                      
+                        """
                       sh """llvm-cov export --format=lcov --instr-profile=coverageTests.profdata   \$(find \${PWD} -name "*.so") > lcov_lib.info"""
                       sh """lcov -a lcov_exec.info -a lcov_lib.info -o coverageTestsReports.info"""
                       sh """lcov_cobertura coverageTestsReports.info --output coverageTestsReports.xml"""
@@ -314,7 +327,7 @@ pipeline {
                 }
 
                 script
-                {               
+                {
                     def sonarArgs = [
                           "-Dsonar.sources=src",
                           "-Dsonar.projectKey=cpplib",
@@ -334,13 +347,13 @@ pipeline {
                           "-Dsonar.qualitygate.wait=true",
                           "-Dsonar.qualitygate.timeout=300",
                           "-Dsonar.branchname=${env.BRANCH_NAME}",
-                          "-Dsonar.verbose=true" 
+                          "-Dsonar.verbose=true"
                     ]
 
-                    if (params.WindowsBuild) {                    
-                      unstash 'win_build'                    
+                    if (params.WindowsBuild) {
+                      unstash 'win_build'
                       sonarArgs << "-Dsonar.cxx.vc.reportPaths=win_build.log"
-                    }                   
+                    }
 
                     withSonarQubeEnv('sonarqube_cpplib') {
                       sh "${ScannerHomePath}/bin/sonar-scanner ${sonarArgs.join(' ')}"

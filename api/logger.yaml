@@ -13,7 +13,7 @@ paths:
       description: Returns a list of  logs from start_date to end_date
       parameters:
         - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'        
+        - $ref: '#/components/parameters/end_date'
       responses:
         '200':
           description: A list of logs
@@ -34,7 +34,7 @@ paths:
       description: Delete logs for all modules from start_date to end_date
       parameters:
         - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'   
+        - $ref: '#/components/parameters/end_date'
       responses:
         '204':
           description: Logs deleted successfully
@@ -47,11 +47,11 @@ paths:
   /LogsByLevel:
     get:
       summary: Get logs by level
-      description: Returns a list of logs with level specifed from start_date to end_date
+      description: Returns a list of logs with level specified from start_date to end_date
       parameters:
         - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'  
-        - $ref: '#/components/parameters/level'          
+        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/level'
       responses:
         '200':
           description: A list of logs at the wanted level
@@ -74,12 +74,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     delete:
-      summary: Delete logs by level 
-      description: Delete logs with level specifed for all modules from start_date to end_date
+      summary: Delete logs by level
+      description: Delete logs with level specified for all modules from start_date to end_date
       parameters:
         - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'  
-        - $ref: '#/components/parameters/level'  
+        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/level'
       responses:
         '204':
           description: Logs deleted successfully
@@ -98,11 +98,11 @@ paths:
   /ModuleLogs:
     get:
       summary: Get logs for a module
-      description: Returns a list of logs for the module specifed from start_date to end_date
+      description: Returns a list of logs for the module specified from start_date to end_date
       parameters:
         - $ref: '#/components/parameters/start_date'
         - $ref: '#/components/parameters/end_date'
-        - $ref: '#/components/parameters/module'         
+        - $ref: '#/components/parameters/module'
       responses:
         '200':
           description: A list of logs for the specified module
@@ -126,11 +126,11 @@ paths:
                 $ref: '#/components/schemas/Error'
     delete:
       summary: Delete logs for a module
-      description: Delete logs for the module specifed from start_date to end_date
+      description: Delete logs for the module specified from start_date to end_date
       parameters:
         - $ref: '#/components/parameters/start_date'
         - $ref: '#/components/parameters/end_date'
-        - $ref: '#/components/parameters/module'       
+        - $ref: '#/components/parameters/module'
       responses:
         '204':
           description: Logs deleted successfully
@@ -145,16 +145,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'                
-  /ModuleLogsByLevel  :
+                $ref: '#/components/schemas/Error'
+  /ModuleLogsByLevel:
     get:
       summary: Get logs by level for a module
-      description: Returns a list of logs for the module and level  specifed from start_date to end_date
+      description: Returns a list of logs for the module and level  specified from start_date to end_date
       parameters:
         - $ref: '#/components/parameters/start_date'
         - $ref: '#/components/parameters/end_date'
-        - $ref: '#/components/parameters/module'   
-        - $ref: '#/components/parameters/level'      
+        - $ref: '#/components/parameters/module'
+        - $ref: '#/components/parameters/level'
       responses:
         '200':
           description: A list of logs for the specified module
@@ -178,12 +178,12 @@ paths:
                 $ref: '#/components/schemas/Error'
     delete:
       summary: Delete logs by level  for a module
-      description: Delete logs with level specifed for a module from start_date to end_date
+      description: Delete logs with level specified for a module from start_date to end_date
       parameters:
         - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'  
-        - $ref: '#/components/parameters/module'  
-        - $ref: '#/components/parameters/level'  
+        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/module'
+        - $ref: '#/components/parameters/level'
       responses:
         '204':
           description: Logs deleted successfully
@@ -202,7 +202,7 @@ paths:
   /Levels:
     get:
       summary: Get logger levels of every modules
-      description: Returns a list of all module with their associated level      
+      description: Returns a list of all module with their associated level
       responses:
         '200':
           description: A list of module with their level
@@ -222,15 +222,15 @@ paths:
     get:
       summary: Get logger level for a module
       description: Returns a the logger level for a module
-      parameters:        
-        - $ref: '#/components/parameters/module'         
+      parameters:
+        - $ref: '#/components/parameters/module'
       responses:
         '200':
           description: A list of logs for the specified module
           content:
             application/json:
               schema:
-                type: object                
+                type: object
                 $ref: '#/components/schemas/LevelItem'
         '404':
           description: Module not found
@@ -243,7 +243,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'  
+                $ref: '#/components/schemas/Error'
     post:
       summary: Set a logger level
       description: Set a logger  level  for a module or all module
@@ -273,11 +273,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /ClearAllModule:
-   delete:
+    delete:
       summary: Delete all logs for a module
       description: Delete all logs for the given module
-      parameters:    
-        - $ref: '#/components/parameters/module'  
+      parameters:
+        - $ref: '#/components/parameters/module'
       responses:
         '204':
           description: All Module logs deleted successfully
@@ -293,13 +293,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /ClearAll: 
+  /ClearAll:
     delete:
       summary: Delete all logs
-      description: Delete all logs for all module      
+      description: Delete all logs for all module
       responses:
         '204':
-          description: All logs deleted successfully        
+          description: All logs deleted successfully
         '500':
           description: Internal server error
           content:
@@ -307,29 +307,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   /Enable:
-     post:
-      summary: Enable or Disable logger 
+    post:
+      summary: Enable or Disable logger
       description: Enable or disable logger for a specific module or all modules
       requestBody:
         required: true
         content:
           application/json:
-            schema:              
-              $ref: '#/components/schemas/EnableItem'                    
+            schema:
+              $ref: '#/components/schemas/EnableItem'
       responses:
         '201':
           description: Loggers enable/disable successfully
           content:
             application/json:
-               schema:
-                oneOf:                  
+              schema:
+                oneOf:
                   - type: array
                     items:
                       $ref: '#/components/schemas/ModuleLevelItem'
                   - type: object
                     properties:
                       disable:
-                        type: string                     
+                        type: string
                         default: OK
         '400':
           description: Invalid input (e.g., missing required fields)
@@ -343,62 +343,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-  
-    
-  # /todos/{id}:
-  #   get:
-  #     summary: Get a specific ToDo item
-  #     description: Returns a specific ToDo item by ID
-  #     parameters:
-  #       - name: id
-  #         in: path
-  #         description: ID of the ToDo item
-  #         required: true
-  #         type: integer
-  #     responses:
-  #       '200':
-  #         description: ToDo item found
-  #         schema:
-  #           $ref: '#/definitions/LogItem'
-  #       '404':
-  #         description: ToDo item not found
-  #   put:
-  #     summary: Update a specific ToDo item
-  #     description: Updates a specific ToDo item by ID
-  #     parameters:
-  #       - name: id
-  #         in: path
-  #         description: ID of the ToDo item
-  #         required: true
-  #         type: integer
-  #       - name: todo
-  #         in: body
-  #         description: Updated ToDo item
-  #         required: true
-  #         schema:
-  #           $ref: '#/definitions/LogItem'
-  #     responses:
-  #       '200':
-  #         description: ToDo item updated successfully
-  #         schema:
-  #           $ref: '#/definitions/LogItem'
-  #       '404':
-  #         description: ToDo item not found
-  #   delete:
-  #     summary: Delete a specific ToDo item
-  #     description: Deletes a specific ToDo item by ID
-  #     parameters:
-  #       - name: id
-  #         in: path
-  #         description: ID of the ToDo item
-  #         required: true
-  #         type: integer
-  #     responses:
-  #       '204':
-  #         description: ToDo item deleted successfully
-  #       '404':
-  #         description: ToDo item not found
 components:
   parameters:
     start_date:
@@ -407,17 +351,17 @@ components:
       required: true
       description: start date of logs to retrieve
       schema:
-            type: string
-            format: date-time 
+        type: string
+        format: date-time
     end_date:
       name: end_date
       in: path
       required: true
       description: end date of logs to retrieve
       schema:
-            type: string
-            format: date-time
-    level: 
+        type: string
+        format: date-time
+    level:
       name: level
       in: path
       required: true
@@ -425,13 +369,13 @@ components:
       schema:
         $ref: '#/components/schemas/LevelType'
     module:
-        in: path
-        name: module
-        description: module concerned
-        required: true
-        schema:
-            type: string
-  schemas:    
+      in: path
+      name: module
+      description: module concerned
+      required: true
+      schema:
+        type: string
+  schemas:
     LogItem:
       type: object
       required:
@@ -444,36 +388,36 @@ components:
           type: string
           format: date-time
           description: The time when log was written
-        module:          
-          description: The module concerned          
+        module:
+          description: The module concerned
           $ref: '#/components/schemas/ModuleType'
         level:
-          description: The log level          
-          $ref: '#/components/schemas/LevelType'   
+          description: The log level
+          $ref: '#/components/schemas/LevelType'
         message:
           type: string
           description: The log message
-          default: app started  
+          default: app started
     ModuleLevelItem:
       type: object
       required:
         - module
         - level
-      properties:        
-        module:          
-          description: The module concerned          
-          $ref: '#/components/schemas/ModuleType' 
+      properties:
+        module:
+          description: The module concerned
+          $ref: '#/components/schemas/ModuleType'
         level:
-          description: The log level          
-          $ref: '#/components/schemas/LevelType'   
+          description: The log level
+          $ref: '#/components/schemas/LevelType'
     LevelItem:
       type: object
-      required:    
+      required:
         - level
-      properties:                
+      properties:
         level:
-          description: The log level          
-          $ref: '#/components/schemas/LevelType' 
+          description: The log level
+          $ref: '#/components/schemas/LevelType'
     EnableItem:
       type: object
       required:
@@ -486,8 +430,8 @@ components:
           default: true
         Module:
           description: The module concerned
-          $ref: '#/components/schemas/ModuleType' 
-    LevelType:      
+          $ref: '#/components/schemas/ModuleType'
+    LevelType:
       enum:
         - trace
         - debug

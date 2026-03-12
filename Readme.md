@@ -1,9 +1,9 @@
 # Foobar
 
-CPPLIB is c++ library
+CPPLIB is a C++ library
 ## Installation
 
-For linux : 
+For linux :
 
 ```bash
 ./Cpplib-x.x.x-Linux.sh
