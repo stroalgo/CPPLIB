@@ -15,7 +15,7 @@ pipeline {
       booleanParam(name:'UnitsTests', defaultValue: true, description:'Enable UnitsTests Run')
 
       //Build With CLANG
-      booleanParam(name:'Clang', defaultValue: false, description:'Use Clang compiler for Linux platform')
+      booleanParam(name:'Clang', defaultValue: true, description:'Use Clang compiler for Linux platform')
 
       //Build Platform Selection
       booleanParam(name:'LinuxBuild', defaultValue: true, description:'Enable Linux build stages')
