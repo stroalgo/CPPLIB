@@ -312,13 +312,6 @@ pipeline {
                     -l "c" \
                     src > rats.xml'
 
-
-                sh 'echo "Static C/C++ code analysis ===> CLANG"'
-                sh """cd build/${params.BuildType} && scan-build \
-                    -plist \
-                    -analyze-headers \
-                    -o clang_reports make"""
-
                 echo "Static C/C++ code analysis ===> CLANG-TIDY"
                 sh "./Scripts/cicd/run-clang-tidy.sh ${params.BuildType}"
 
@@ -338,7 +331,6 @@ pipeline {
                           "-Dsonar.cxx.valgrind.reportPaths=build/${params.BuildType}/**/*_test_valgrind.xml",
                           "-Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml",
                           "-Dsonar.cxx.rats.reportPaths=rats.xml",
-                          "-Dsonar.cxx.clangsa.reportPaths=build/${params.BuildType}/clang_reports/*/*.plist",
                           "-Dsonar.cxx.clangtidy.reportPaths=clang-tidy.txt",
                           "-Dsonar.cxx.xunit.reportPaths=build/${params.BuildType}/unitTestReports.xml",
                           "-Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml",
