@@ -294,7 +294,6 @@ pipeline {
                 sh 'echo "Static C/C++ code analysis ===> CPPCHECK"'
                 sh """cppcheck \
                     --enable=all  \
-                    -j 4 \
                     -v \
                     --language=c++ \
                     --suppress=missingIncludeSystem \
@@ -320,11 +319,8 @@ pipeline {
                     -analyze-headers \
                     -o clang_reports make"""
 
-                sh 'echo "Static C/C++ code analysis ===> CLANG-TIDY"'
-                catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS', message: 'Skip in case of cmd failure')
-                {
-                  sh """cd build/${params.BuildType} && run-clang-tidy > clang-tidy.txt"""
-                }
+                echo "Static C/C++ code analysis ===> CLANG-TIDY"
+                sh "./Scripts/cicd/run-clang-tidy.sh ${params.BuildType}"
 
                 script
                 {
@@ -332,6 +328,8 @@ pipeline {
                           "-Dsonar.sources=src",
                           "-Dsonar.projectKey=cpplib",
                           "-Dsonar.exclusions=src/***/unitTest/*.cpp",
+                          "-Dsonar.tests=src",
+                          "-Dsonar.test.inclusions=**/unitTest/**",
                           "-Dsonar.cfamily.compile-commands=build/${params.BuildType}/compile_commands.json",
                           "-Dsonar.cxx.includeDirectories=src/Utilities/Common/headers,src/Utilities/Logger/headers,src/Utilities/Network/headers",
                           "-Dsonar.cxx.gcc.encoding=UTF-8 ",
@@ -341,7 +339,7 @@ pipeline {
                           "-Dsonar.cxx.cppcheck.reportPaths=cppcheck.xml",
                           "-Dsonar.cxx.rats.reportPaths=rats.xml",
                           "-Dsonar.cxx.clangsa.reportPaths=build/${params.BuildType}/clang_reports/*/*.plist",
-                          "-Dsonar.cxx.clangtidy.reportPaths=build/${params.BuildType}/clang-tidy.txt",
+                          "-Dsonar.cxx.clangtidy.reportPaths=clang-tidy.txt",
                           "-Dsonar.cxx.xunit.reportPaths=build/${params.BuildType}/unitTestReports.xml",
                           "-Dsonar.cxx.cobertura.reportPaths=coverageTestsReports.xml",
                           "-Dsonar.qualitygate.wait=true",
