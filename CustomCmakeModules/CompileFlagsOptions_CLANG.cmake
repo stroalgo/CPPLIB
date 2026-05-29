@@ -49,8 +49,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     -ggdb3 # Debug level for GDB
     -O0 # No optimization
     -gline-tables-only # Emit debug line number tables only
-    -gmodules # Generate debug information for modules
-    -fjmc # Enable just-my-code debugging
     -gcodeview # Generate debug information in CodeView format
     -fdiagnostics-color=always # Enable colors in diagnostics
     -fdiagnostics-show-line-numbers # Show line numbers in diagnostics

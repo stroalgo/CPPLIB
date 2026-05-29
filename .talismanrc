@@ -3,4 +3,6 @@ fileignoreconfig:
   checksum: b60a9a3aa8d6dca441a69136ac239f52057d87384e855260b36a78a6c863c39d
   ignore_detectors:
   - filecontent
+- filename: Configs/.clang-tidy
+  checksum: cff01038f7d945ba90d55d1e324ead73080643049e047a6f6db31636b267adbb
 version: "1.0"
