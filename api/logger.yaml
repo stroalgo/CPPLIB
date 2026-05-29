@@ -4,7 +4,7 @@ info:
   description: API to manage LOGGER
   version: 1.0.0
 servers:
-  - url: http://localhost:13130/api
+  - url: http://localhost:13130/api/logger
     description: Local development server
 paths:
   /Logs:

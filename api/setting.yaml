@@ -1,0 +1,199 @@
+openapi: 3.0.0
+info:
+  title: SETTING API
+  description: API to manage SETTING
+  version: 1.0.0
+servers:
+  - url: http://localhost:13130/api/settings
+    description: Local development server
+paths:
+  /all:
+    get:
+      summary: Get All modules settings
+      description: Returns a list of  modules settings with their associated log level
+      responses:
+        '200':
+          description: A list of  modules settings with their log level
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SettingItem'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Save the current settings
+      description: Save the current settings being used for a module
+      responses:
+        '200':
+          description: Settings saved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SettingItem'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /reset:
+    post:
+      summary: Reset settings
+      description: Reset the settings for a module
+      responses:
+        '200':
+          description: Settings reset successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SettingItem'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /server:
+    get:
+      summary: Get Server settings
+      description: Returns the server specific settings
+      responses:
+        '200':
+          description: The server specific settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerItem'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /logger:
+    get:
+      summary: Get logger settings
+      description: Returns the logger specific settings
+      responses:
+        '200':
+          description: The logger specific settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoggerItem'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    SettingItem:
+      type: object
+      required:
+        - module
+        - level
+      properties:
+        module:
+          description: The module concerned
+          $ref: '#/components/schemas/ModuleType'
+        level:
+          description: The log level
+          $ref: '#/components/schemas/LevelType'
+    ServerItem:
+      type: object
+      required:
+        - level
+        - port
+        - host
+        - protocol
+        - secured
+      properties:
+        level:
+          description: The log level
+          $ref: '#/components/schemas/LevelType'
+        port:
+          type: integer
+          description: The server port
+          default: 13130
+        host:
+          type: string
+          description: The server host
+          default: localhost
+        protocol:
+          description: The server protocol
+          $ref: '#/components/schemas/ProtocolType'
+        secured:
+          type: boolean
+          description: Whether the server is secured (HTTPS)
+          default: true
+    LoggerItem:
+      type: object
+      required:
+        - module
+        - level
+        - console
+      properties:
+        module:
+          description: The module concerned
+          $ref: '#/components/schemas/ModuleType'
+        level:
+          description: The log level
+          $ref: '#/components/schemas/LevelType'
+        format:
+          type: string
+          description: The log format (e.g., JSON, plain text)
+          default: JSON
+        console:
+          type: boolean
+          description: Output logs to console
+          default: true
+    LevelType:
+      type: string
+      enum:
+        - trace
+        - debug
+        - info
+        - warning
+        - error
+        - critical
+    ModuleType:
+      type: string
+      enum:
+        - logger
+        - server
+        - settings
+    ProtocolType:
+      type: string
+      enum:
+        - https
+        - http
+        - grpc
+        - mqtt
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: A brief description of the error
+        message:
+          type: string
+          description: A detailed error message
+        statusCode:
+          type: integer
+          description: The HTTP status code
+      example:
+        error: "Bad Request"
+        message: "The request body is missing a required field."
+        statusCode: 400
