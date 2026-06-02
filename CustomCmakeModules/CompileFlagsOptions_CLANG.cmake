@@ -27,7 +27,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                          # emitted.
   )
   add_link_options(-flto=full)
-  message("🟢 CLANG RELEASE Compile options added")
+  message(STATUS "🟢 CLANG RELEASE Compile options added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
   add_compile_options(
@@ -40,7 +40,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     -fjmc # Enable just-my-code debugging
     -fdiagnostics-color=always # Enable colors in diagnostics
   )
-  message("🟢 CLANG RELEASE WITH DEBUG INFO Compile options  added")
+  message(STATUS "🟢 CLANG RELEASE WITH DEBUG INFO Compile options  added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_options(
@@ -61,7 +61,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   )
 
   if(BUILD_WITH_DEEP_DIVE_DEBUG_MODE)
-    message("🟢 DEEP DIVE IN DEBUG TYPE BUILD enabled")
+    message(STATUS "🟢 DEEP DIVE IN DEBUG TYPE BUILD enabled")
     add_compile_options(
       -fshow-skipped-includes # Show skipped includes
       --save-stats # Save frontend statistics
@@ -103,7 +103,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     # -fcoroutines # Enable support for C++ coroutines ==> allow in c++20
   )
 
-  message("🟢 CLANG DEBUG Compile options added")
+  message(STATUS "🟢 CLANG DEBUG Compile options added")
 endif()
 
 # ---------------------------------------------------------Common Compile Link
