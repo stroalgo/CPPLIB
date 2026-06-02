@@ -149,7 +149,7 @@ pipeline {
                 {
                   def buildOptions = " "
                   if (params.Valgrind) {
-                    buildOptions += " -DBUILD_WITH_MEMCHECK_VAL=ON "
+                    buildOptions += " -DBUILD_WITH_MEMCHECK_VAL_DRM=ON "
                   }
 
                   if (params.Documentation) {
@@ -285,6 +285,7 @@ pipeline {
               steps {
                 bat 'echo "Running Unit Tests..."'
                 bat """ctest -V --build-config ${params.BuildType} --test-dir build  --output-junit  unitTestReports.xml"""
+                stash name: 'drmemory-logs', include: """build/${params.BuildType}/drmemory_logs/**/results.txt"""
               }
               post {
                 success  {
@@ -355,6 +356,8 @@ pipeline {
                     if (params.WindowsBuild) {
                       unstash 'win_build'
                       sonarArgs << "-Dsonar.cxx.vc.reportPaths=win_build.log"
+                      unstash 'drmemory-logs'
+                      sonarArgs << "-Dsonar.cxx.drmemory.reportPaths=build/${params.BuildType}/drmemory_logs/**/results.txt"
                     }
 
                     withSonarQubeEnv('sonarqube_cpplib') {
