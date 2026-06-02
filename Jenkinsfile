@@ -6,7 +6,7 @@ pipeline {
   parameters{
 
       //Enable Valgrind
-      booleanParam(name:'Valgrind', defaultValue: false, description:'Enable Valgrind for profiling Memory/Leak')
+      booleanParam(name:'Valgrind/DrMemory', defaultValue: true, description:'Enable Valgrind for profiling Memory/Leak')
 
       //Enable Documentation
       booleanParam(name:'Documentation', defaultValue: false, description:'Enable Doc Generation')
@@ -273,7 +273,7 @@ pipeline {
               steps {
                 bat 'echo "Running Unit Tests..."'
                 bat """ctest -V --build-config ${params.BuildType} --test-dir build  --output-junit  unitTestReports.xml"""
-                stash name: 'drmemory-logs', include: """build/${params.BuildType}/drmemory_logs/**/results.txt"""
+                stash name: 'drmemory-logs', includes: """build/${params.BuildType}/drmemory_logs/**/results.txt"""
               }
               post {
                 success  {
