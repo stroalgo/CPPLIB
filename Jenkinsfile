@@ -273,11 +273,11 @@ pipeline {
               steps {
                 bat 'echo "Running Unit Tests..."'
                 bat """ctest -V --build-config ${params.BuildType} --test-dir build  --output-junit  unitTestReports.xml"""
-                stash name: 'drmemory-logs', includes: """build/${params.BuildType}/drmemory_logs/**/results.txt"""
+                stash name: 'drmemory-logs', includes: """build/drmemory_logs/**/results.txt"""
               }
               post {
                 success  {
-                    junit (testResults:"""build/${params.BuildType}/unitTestReports.xml""", allowEmptyResults : true)
+                    junit (testResults:"""build/unitTestReports.xml""", allowEmptyResults : true)
                 }
               }
 

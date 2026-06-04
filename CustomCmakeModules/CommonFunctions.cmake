@@ -182,7 +182,8 @@ function(memorycheck UNIT_TEST)
     if(IS_LINUX)
       find_program(VALGRIND "valgrind")
       if(VALGRIND)
-        message(STATUS "🟢 MEMCHECK profiling with valgrind on LIN")
+        message(
+          STATUS "🟢 MEMCHECK profiling with valgrind for ${UNIT_TEST} on LIN")
         add_test(
           NAME ${UNIT_TEST}_memchecked
           COMMAND
@@ -199,7 +200,10 @@ function(memorycheck UNIT_TEST)
     elseif(IS_WINDOWS)
       find_program(DRM "drmemory")
       if(DRM)
-        message(STATUS "🟢 MEMCHECK profiling with Dr Memory enable on WIN")
+        message(
+          STATUS
+            "🟢 MEMCHECK profiling with Dr Memory enable for ${UNIT_TEST} on WIN"
+        )
         set(LOG_DIR "${CMAKE_BINARY_DIR}/drmemory_logs/${UNIT_TEST}")
         file(MAKE_DIRECTORY ${LOG_DIR})
         add_test(NAME ${UNIT_TEST}_memchecked
