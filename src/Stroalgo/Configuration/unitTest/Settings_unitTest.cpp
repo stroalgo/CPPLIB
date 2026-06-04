@@ -11,17 +11,22 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <system_error>
 
 #include "Constants.h"
 
 class SettingsManagerTest : public ::testing::Test {
  protected:
   void TearDown() override {
-    if (std::filesystem::exists("settings.ini")) {
-      std::filesystem::remove_all("settings.ini");
+    const std::filesystem::path settingsFile{"settings.ini"};
+    const std::filesystem::path logsDir{L"LOGS"};
+
+    std::error_code ec;
+    if (std::filesystem::exists(settingsFile)) {
+      std::filesystem::remove(settingsFile, ec);
     }
-    if (std::filesystem::exists("LOGS")) {
-      std::filesystem::remove_all("LOGS");
+    if (std::filesystem::exists(logsDir)) {
+      std::filesystem::remove_all(logsDir, ec);
     }
   }
 

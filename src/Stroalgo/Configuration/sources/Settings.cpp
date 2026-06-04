@@ -7,8 +7,9 @@
 
 #include "Settings.h"
 
+#include <algorithm>
 #include <boost/property_tree/ini_parser.hpp>
-#include <boost/regex.hpp>
+#include <cctype>
 #include <cstdint>
 #include <filesystem>
 
@@ -106,15 +107,21 @@ void Settings::LoadSettings() {
     // Check and Populate every module settings
     auto modulesSection = lSettingsTree.get_child("Modules");
     m_ModulesSettings.clear();
-    const boost::regex special_char_regex("[^a-zA-Z0-9_]");
+    auto isInvalidModuleName = [](const std::string& name) {
+      if (name.empty()) {
+        return true;
+      }
+      return std::any_of(name.begin(), name.end(), [](unsigned char c) {
+        return !(std::isalnum(c) || c == '_');
+      });
+    };
     for (const auto& module : modulesSection) {
       const std::string& lModuleName{module.first};
 
       // Validate ModuleName
-      if (boost::regex_search(lModuleName, special_char_regex)) {
-        throw Exceptions::LoggerException(
-            lModuleName +
-            "Module name ill formatted");  // Skip empty module names
+      if (isInvalidModuleName(lModuleName)) {
+        throw Exceptions::LoggerException(lModuleName +
+                                          "Module name ill formatted");
       } else {
         const boost::log::trivial::severity_level lModuleLogLevel{
             module.second.get_value<boost::log::trivial::severity_level>()};
