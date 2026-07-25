@@ -345,7 +345,7 @@ pipeline {
                       unstash 'win_build'
                       sonarArgs << "-Dsonar.cxx.vc.reportPaths=win_build.log"
                       unstash 'drmemory-logs'
-                      sonarArgs << "-Dsonar.cxx.drmemory.reportPaths=build/${params.BuildType}/drmemory_logs/**/results.txt"
+                      sonarArgs << "-Dsonar.cxx.drmemory.reportPaths=build/drmemory_logs/**/results.txt"
                     }
 
                     withSonarQubeEnv('sonarqube_cpplib') {
