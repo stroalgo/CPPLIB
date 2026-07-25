@@ -127,7 +127,7 @@ function(make_doxygen_doc NAME VERSION DESCRIPTION)
   else()
     message(
       FATAL_ERROR
-        "🔴 Doxygen need to be installed to generate the doxygen documentation")
+        "🔴 Doxygen needs to be installed to generate the doxygen documentation")
   endif()
 endfunction()
 
@@ -195,7 +195,7 @@ function(memorycheck UNIT_TEST)
       else()
         message(
           FATAL_ERROR
-            "🔴 Valgrind need to be installed to profile memory usage/leak")
+            "🔴 Valgrind needs to be installed to profile memory usage/leaks")
       endif()
     elseif(IS_WINDOWS)
       find_program(DRM "drmemory")
@@ -208,11 +208,11 @@ function(memorycheck UNIT_TEST)
         file(MAKE_DIRECTORY ${LOG_DIR})
         add_test(NAME ${UNIT_TEST}_memchecked
                  COMMAND ${DRM} -batch -brief -logdir ${LOG_DIR}
-                         -exit_code_if_errors 0 -- $<TARGET_FILE:${UNIT_TEST}>)
+                         -exit_code_if_errors 1 -- $<TARGET_FILE:${UNIT_TEST}>)
       else()
         message(
           FATAL_ERROR
-            "🔴 Dr Memory need to be installed to profile memory usage/leak")
+            "🔴 Dr Memory needs to be installed to profile memory usage/leak")
       endif()
     else()
       message(

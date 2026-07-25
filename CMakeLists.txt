@@ -29,7 +29,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ---------------------------------------------------------Options--------------------------------------------------------
 option(BUILD_WITH_TEST "Build units tests" ON)
 option(BUILD_WITH_MEMCHECK_VAL_DRM
-       "Add a Valgrind/DrMemory check for each units tests" ON)
+       "Add a Valgrind/DrMemory check for each unit test run" ON)
 option(BUILD_WITH_DOC "Generate Documentation" OFF)
 option(BUILD_WITH_CLANG "Build with Clang Compiler" ON)
 option(BUILD_WITH_DEEP_DIVE_DEBUG_MODE "Deep-Dive Debugging Compilation" OFF)
