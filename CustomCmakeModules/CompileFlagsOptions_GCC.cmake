@@ -27,7 +27,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     -fstdarg-opt # optimize varargs usage
     -fstack-clash-protection # mitigate stack clash attacks
   )
-  message("🟢 GCC RELEASE options Flags added")
+  message(STATUS "🟢 GCC RELEASE options Flags added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
   add_compile_options(
@@ -45,7 +45,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     -fstack-usage # produce stack usage info per function
     -fstats # emit compiler statistics
   )
-  message("🟢 GCC RELEASE WITH DEBUG INFO options Flags added")
+  message(STATUS "🟢 GCC RELEASE WITH DEBUG INFO options Flags added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
@@ -72,7 +72,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     -fstats # emit compiler stats
     -fsanitize=pointer-overflow # detect pointer arithmetic overflow
   )
-  message("🟢 GCC DEBUG options Flags added")
+  message(STATUS "🟢 GCC DEBUG options Flags added")
 endif()
 
 # ---------------------------------------------------------Common Sanitizer
@@ -195,12 +195,12 @@ add_compile_options(
 
 # ---------------------------------------------------------Memory/Leak
 # Profiling--------------------------------------------------------
-if(NOT BUILD_WITH_MEMCHECK_VAL)
+if(NOT BUILD_WITH_MEMCHECK_VAL_DRM)
   add_link_options(-fsanitize=leak # enable leak sanitizer at link-time
   )
   add_compile_options(-fsanitize=leak # enable leak sanitizer at compile-time
   )
-  message("🟢 ASAN G++ built-in is used for memory/leak profiling")
+  message(STATUS "🟢 ASAN G++ built-in is used for memory/leak profiling")
 else()
-  message("🟢 VALGRIND is used for memory/leak profiling")
+  message(STATUS "🟢 VALGRIND is used for memory/leak profiling")
 endif()

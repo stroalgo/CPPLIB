@@ -27,7 +27,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
                          # emitted.
   )
   add_link_options(-flto=full)
-  message("🟢 CLANG RELEASE Compile options added")
+  message(STATUS "🟢 CLANG RELEASE Compile options added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
   add_compile_options(
@@ -40,7 +40,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     -fjmc # Enable just-my-code debugging
     -fdiagnostics-color=always # Enable colors in diagnostics
   )
-  message("🟢 CLANG RELEASE WITH DEBUG INFO Compile options  added")
+  message(STATUS "🟢 CLANG RELEASE WITH DEBUG INFO Compile options  added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_options(
@@ -61,7 +61,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   )
 
   if(BUILD_WITH_DEEP_DIVE_DEBUG_MODE)
-    message("🟢 DEEP DIVE IN DEBUG TYPE BUILD enabled")
+    message(STATUS "🟢 DEEP DIVE IN DEBUG TYPE BUILD enabled")
     add_compile_options(
       -fshow-skipped-includes # Show skipped includes
       --save-stats # Save frontend statistics
@@ -70,40 +70,49 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     )
   endif()
 
-  # ---------------------------------------------------------Compile Link
-  # options--------------------------------------------------------
-  add_link_options(
-    -shared-libasan # AddressSanitizer
-    -shared-libsan # AddressSanitizer, MemorySanitizer,
-                   # ThreadSanitizer,UndefinedBehaviorSanitizer
-    -fsanitize=address # Enable AddressSanitizer
-  )
-
-  # ---------------------------------------------------------Sanitize Compile
-  # options--------------------------------------------------------
+  # -----Sanitize Compile options
   add_compile_options(
     -fsanitize-link-c++-runtime # Link the C++ runtime with -fsanitize
-    -fsanitize=address # Enable AddressSanitizer
-    -fsanitize=undefined # Enable UndefinedBehaviorSanitizer
     -fsanitize=leak # Enable LeakSanitizer
     -fno-sanitize-ignorelist # Disable the use of the ignorelist for -fsanitize
-    -fsanitize-address-poison-custom-array-cookie # Put a red zone after arrays
-    -fsanitize-address-use-after-scope # Find uses of local variables outside
-                                       # their scope allocated with new[]
-    -fsanitize-address-use-after-return=always # Find uses of stack memory after
-    # the containing function has returned
-    -fsanitize=integer-divide-by-zero # Detect integer division by zero
     -fsanitize-cfi-cross-dso # Enable CFI protection across shared objects
     -fsanitize-stats # Collect and display sanitizer statistics
-    # TODO USE of memory sanitizer ==> -fsanitize=memory # -fmemory-profile #
-    # Enable heap memory profiling -fsanitize-memory-param-retval # Run
-    # MemorySanitizer on function parameters and return values
-    # -fsanitize-memory-track-origins # Run MemorySanitizer with origin tracking
-    # TODO USE of thread sanitizer ==> -fsanitize=thread -fsanitize=thread
-    # -fcoroutines # Enable support for C++ coroutines ==> allow in c++20
   )
 
-  message("🟢 CLANG DEBUG Compile options added")
+  # -----Memory/Leak Profiling
+  if(NOT BUILD_WITH_MEMCHECK_VAL_DRM)
+    # Compile Link options
+    add_link_options(
+      -shared-libasan # AddressSanitizer
+      -shared-libsan # AddressSanitizer,
+                     # MemorySanitizer,ThreadSanitizer,UndefinedBehaviorSanitizer
+      -fsanitize=address # Enable AddressSanitizer
+    )
+    add_compile_options(
+      -fsanitize=address # Enable AddressSanitizer
+      -fsanitize=undefined # Enable UndefinedBehaviorSanitizer
+      -fsanitize-address-poison-custom-array-cookie # Put a red zone after
+                                                    # arrays
+      -fsanitize-address-use-after-scope # Find uses of local variables outside
+                                         # their scope allocated with new[]
+      -fsanitize-address-use-after-return=always # Find uses of stack memory
+                                                 # after the containing function
+                                                 # has returned
+      -fsanitize=integer-divide-by-zero # Detect integer division by zero
+      # TODO USE of memory sanitizer ==> -fsanitize=memory # -fmemory-profile #
+      # Enable heap memory profiling -fsanitize-memory-param-retval # Run
+      # MemorySanitizer on function parameters and return values
+      # -fsanitize-memory-track-origins # Run MemorySanitizer with origin
+      # tracking TODO USE of thread sanitizer ==> -fsanitize=thread
+      # -fsanitize=thread -fcoroutines # Enable support for C++ coroutines ==>
+      # allow in c++20
+    )
+    message(STATUS "🟢 ASAN G++ built-in is used for memory/leak profiling")
+  else()
+    message(STATUS "🟢 VALGRIND is used for memory/leak profiling")
+  endif()
+
+  message(STATUS "🟢 CLANG DEBUG Compile options added")
 endif()
 
 # ---------------------------------------------------------Common Compile Link

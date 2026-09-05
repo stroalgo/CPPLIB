@@ -103,7 +103,7 @@ function(make_doxygen_doc NAME VERSION DESCRIPTION)
   # Import Doxygen if it is not already the case
   find_package(Doxygen REQUIRED dot)
   if(DOXYGEN_FOUND)
-    message("🟢 Add documentation for ${NAME}")
+    message(STATUS "🟢 Add documentation for ${NAME}")
 
     # set input and output files
     set(DOXYGEN_PROJECT_NAME ${NAME})
@@ -126,7 +126,8 @@ function(make_doxygen_doc NAME VERSION DESCRIPTION)
             DESTINATION ${CMAKE_INSTALL_DOCDIR}/${NAME})
   else()
     message(
-      "🔴 Doxygen need to be installed to generate the doxygen documentation")
+      FATAL_ERROR
+        "🔴 Doxygen needs to be installed to generate the doxygen documentation")
   endif()
 endfunction()
 
@@ -137,7 +138,7 @@ endfunction()
 
 function(add_unit_test NAME)
 
-  message("🟢 Add Unitest for ${NAME}")
+  message(STATUS "🟢 Add Unitest for ${NAME}")
 
   # List all test files
   file(GLOB_RECURSE tests_SRC "${CMAKE_CURRENT_SOURCE_DIR}/unitTest/*.cpp"
@@ -177,21 +178,49 @@ endfunction()
 # Function to profile memory of a unit test (executable)
 # -----------------------------------------------------------------------------
 function(memorycheck UNIT_TEST)
-  if(IS_LINUX AND BUILD_WITH_MEMCHECK_VAL)
-    find_program(VALGRIND "valgrind")
-    if(VALGRIND)
-      add_test(
-        NAME ${UNIT_TEST}_memchecked
-        COMMAND
-          valgrind --error-exitcode=1 --tool=memcheck --leak-check=full
-          --show-reachable=yes --track-fds=yes --errors-for-leak-kinds=definite
-          --xml=yes --xml-file=${UNIT_TEST}_valgrind.xml
-          --show-leak-kinds=definite $<TARGET_FILE:${UNIT_TEST}>)
+  if(BUILD_WITH_MEMCHECK_VAL_DRM)
+    if(IS_LINUX)
+      find_program(VALGRIND "valgrind")
+      if(VALGRIND)
+        message(
+          STATUS "🟢 MEMCHECK profiling with valgrind for ${UNIT_TEST} on LIN")
+        add_test(
+          NAME ${UNIT_TEST}_memchecked
+          COMMAND
+            ${VALGRIND} --error-exitcode=1 --tool=memcheck --leak-check=full
+            --show-reachable=yes --track-fds=yes
+            --errors-for-leak-kinds=definite --xml=yes
+            --xml-file=${UNIT_TEST}_valgrind.xml --show-leak-kinds=definite
+            $<TARGET_FILE:${UNIT_TEST}>)
+      else()
+        message(
+          FATAL_ERROR
+            "🔴 Valgrind needs to be installed to profile memory usage/leaks")
+      endif()
+    elseif(IS_WINDOWS)
+      find_program(DRM "drmemory")
+      if(DRM)
+        message(
+          STATUS
+            "🟢 MEMCHECK profiling with Dr Memory enable for ${UNIT_TEST} on WIN"
+        )
+        set(LOG_DIR "${CMAKE_BINARY_DIR}/drmemory_logs/${UNIT_TEST}")
+        file(MAKE_DIRECTORY ${LOG_DIR})
+        add_test(NAME ${UNIT_TEST}_memchecked
+                 COMMAND ${DRM} -batch -brief -logdir ${LOG_DIR}
+                         -exit_code_if_errors 1 -- $<TARGET_FILE:${UNIT_TEST}>)
+      else()
+        message(
+          FATAL_ERROR
+            "🔴 Dr Memory needs to be installed to profile memory usage/leak")
+      endif()
     else()
-      message("🔴 Valgrind need to be installed to profile memory usage/leak")
+      message(
+        FATAL_ERROR
+          "🔴 This platform is not yet supported : ${CMAKE_HOST_SYSTEM_NAME}")
     endif()
   else()
-    # Dr memory from windows
+    message(AUTHOR_WARNING "🟠 MEMCHECK Disable for the current build")
   endif()
 endfunction()
 
