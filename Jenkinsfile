@@ -254,8 +254,11 @@ pipeline {
                     else
                     {
                       sh """ctest -V -T Coverage --test-dir build/${params.BuildType}"""
-                      sh """gcovr --root src/ --filter src/ --exclude-directories .*/unitTest  --object-directory build/${params.BuildType} --cobertura-pretty --cobertura --print-summary  --output coverageTestsReports.xml"""
+                      sh """gcovr --root src/ --filter src/ --exclude-directories .*/unitTest  --object-directory build/${params.BuildType} --cobertura-pretty --cobertura --print-summary --merge-lines --decisions --exclude-noncode-lines  --exclude '/usr/.*' --exclude '/usr/include/.*' --exclude './build/.*' --output coverageTestsReports.xml"""
                     }
+                    recordCoverage tools: [[parser: 'Cobertura', path: 'coverageTestsReports.xml']],
+                    sourceCodeRetention: 'EVERY_BUILD',
+                    sourceDirectories: [[path: 'src']]
                 }
 
               }
