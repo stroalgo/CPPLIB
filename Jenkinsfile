@@ -254,8 +254,20 @@ pipeline {
                     else
                     {
                       sh """ctest -V -T Coverage --test-dir build/${params.BuildType}"""
-                      sh """gcovr --root src/ --filter src/ --exclude-directories .*/unitTest  --object-directory build/${params.BuildType} --cobertura-pretty --cobertura --print-summary  --output coverageTestsReports.xml"""
+                      sh """gcovr --root src/ --filter src/ --exclude-directories .*/unitTest  --object-directory build/${params.BuildType} --cobertura-pretty --cobertura --print-summary --merge-lines --decisions --exclude-noncode-lines  --exclude '/usr/.*' --exclude '/usr/include/.*' --exclude './build/.*' --output coverageTestsReports.xml"""
                     }
+                    recordCoverage tools: [[parser: 'COBERTURA', pattern: 'coverageTestsReports.xml']],
+                    sourceCodeRetention: 'EVERY_BUILD',
+                    sourceDirectories: [[path: 'src']],
+                    skipSymbolicLinks: true,
+                    qualityGates: [
+                      // Rule 1: Mark build as UNSTABLE (Yellow) if overall line coverage drops below 85%
+                      [threshold: 85.0, metric: 'LINE', baseline: 'PROJECT', criticality: 'UNSTABLE'],
+                      // Rule 2: FAIL the build (Red) if overall line coverage drops below 80%
+                      [threshold: 80.0, metric: 'LINE', baseline: 'PROJECT', criticality: 'FAILURE'],
+                      // Rule 3: FAIL the build if the new code introduced in a PR is less than 90% covered
+                      [threshold: 90.0, metric: 'LINE', baseline: 'MODIFIED_LINES', criticality: 'FAILURE']
+                    ]
                 }
 
               }
