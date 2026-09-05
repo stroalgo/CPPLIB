@@ -85,6 +85,9 @@ endif()
 # Openssl
 find_package(OpenSSL REQUIRED)
 
+# PostgreSQL
+find_package(PostgreSQL REQUIRED)
+
 # Spdlog
 find_package(spdlog REQUIRED)
 if(Spdlog_FOUND)

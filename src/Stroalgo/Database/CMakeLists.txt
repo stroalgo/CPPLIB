@@ -1,12 +1,12 @@
 # -----------------------------------------------------------------------------
-# Configuration library project
+# Database library project
 # -----------------------------------------------------------------------------
 
 # Project definitions
 project(
-  Settings
+  Database
   VERSION 1.0.0
-  DESCRIPTION "This library contains Configuration utilities"
+  DESCRIPTION "This library contains Database utilities"
   LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------
@@ -15,12 +15,16 @@ project(
 add_shared_library(${PROJECT_NAME} ${PROJECT_VERSION})
 
 # Sources Files
-target_sources(${PROJECT_NAME} PRIVATE sources/Settings.cpp)
+target_sources(${PROJECT_NAME} PRIVATE sources/Pgre.cpp)
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PUBLIC headers/)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost Boost::log Common)
+# link libraries
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE PostgreSQL::PostgreSQL
+  PUBLIC Common)
 
 # -----------------------------------------------------------------------------
 # Documentation

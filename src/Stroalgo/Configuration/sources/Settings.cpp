@@ -1,6 +1,6 @@
 /**
- * @file Logger.cpp
- * @brief A SettingManager class
+ * @file Settings.cpp
+ * @brief A Settings class
  * @details Uses Boost
  * @copyright   Copyright (c) 2025 stroalgo.corp
  */
