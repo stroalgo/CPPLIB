@@ -77,8 +77,19 @@ void Settings::CreateDefaultSettingsFile() {
 }
 
 void Settings::CreateLogsFolder(const std::string& pLogsPath) {
-  if (!std::filesystem::exists(pLogsPath)) {
-    std::filesystem::create_directories(pLogsPath);
+  if (pLogsPath.empty()) {
+    throw Exceptions::LoggerException("Logs Path provided is empty");
+  }
+  std::filesystem::path lLogsPath{pLogsPath};
+  if (lLogsPath.empty()) {
+    throw Exceptions::LoggerException(
+        "Logs Path provided can not be resolve as filesystem");
+  }
+  std::error_code lError{};
+  if (!std::filesystem::exists(lLogsPath, lError)) {
+    create_directories(lLogsPath, lError);
+  } else {
+    // Log folder already exist
   }
 }
 
