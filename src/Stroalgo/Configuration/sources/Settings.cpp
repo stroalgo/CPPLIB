@@ -15,6 +15,7 @@
 
 #include "Constants.h"
 #include "Exceptions.h"
+#include "Utils.h"
 
 namespace Stroalgo::Configuration {
 
@@ -47,7 +48,7 @@ void Settings::CreateDefaultSettingsFile() {
   m_LoggerSettings.m_SettingLogPath = "LOGS";
   lSettingsTree.put<std::string>("Logger.LogPath",
                                  m_LoggerSettings.m_SettingLogPath);
-  CreateLogsFolder(m_LoggerSettings.m_SettingLogPath);
+  Common::Utils::CreateFolder(m_LoggerSettings.m_SettingLogPath);
 
   // Default log level is trace
   m_LoggerSettings.m_SettingLogLevel = boost::log::trivial::trace;
@@ -76,23 +77,6 @@ void Settings::CreateDefaultSettingsFile() {
   m_SettingsLoaded = true;
 }
 
-void Settings::CreateLogsFolder(const std::string& pLogsPath) {
-  if (pLogsPath.empty()) {
-    throw Exceptions::LoggerException("Logs Path provided is empty");
-  }
-  std::filesystem::path lLogsPath{pLogsPath};
-  if (lLogsPath.empty()) {
-    throw Exceptions::LoggerException(
-        "Logs Path provided can not be resolve as filesystem");
-  }
-  std::error_code lError{};
-  if (!std::filesystem::exists(lLogsPath, lError)) {
-    create_directories(lLogsPath, lError);
-  } else {
-    // Log folder already exist
-  }
-}
-
 void Settings::LoadSettings() {
   try {
     // Load settings from file
@@ -104,7 +88,7 @@ void Settings::LoadSettings() {
     const std::string& lSettingPath{
         lSettingsTree.get<std::string>("Logger.LogPath")};
 
-    CreateLogsFolder(lSettingPath);
+    Common::Utils::CreateFolder(lSettingPath);
     m_LoggerSettings.m_SettingLogPath =
         std::filesystem::path(lSettingPath).make_preferred().string();
 

@@ -12,11 +12,13 @@ project(
 # -----------------------------------------------------------------------------
 # Build Library
 # -----------------------------------------------------------------------------
-add_interface_library(${PROJECT_NAME} ${PROJECT_VERSION})
+add_shared_library(${PROJECT_NAME} ${PROJECT_VERSION})
+
+# Sources Files
+target_sources(${PROJECT_NAME} PRIVATE sources/Utils.cpp)
 
 # Include directories
-target_include_directories(${PROJECT_NAME} INTERFACE headers/)
-
+target_include_directories(${PROJECT_NAME} PUBLIC headers/)
 # -----------------------------------------------------------------------------
 # Documentation
 # -----------------------------------------------------------------------------
@@ -28,5 +30,6 @@ endif()
 # Tests
 # -----------------------------------------------------------------------------
 if(BUILD_TESTING)
-  add_unit_test(${PROJECT_NAME})
+  set(DEPENDENCIES Boost::filesystem Boost::system)
+  add_unit_test(${PROJECT_NAME} ${DEPENDENCIES})
 endif()
