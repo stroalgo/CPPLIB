@@ -7,13 +7,15 @@
 
 #include "Settings.h"
 
+#include <algorithm>
 #include <boost/property_tree/ini_parser.hpp>
-#include <boost/regex.hpp>
+#include <cctype>
 #include <cstdint>
 #include <filesystem>
 
 #include "Constants.h"
 #include "Exceptions.h"
+#include "Utils.h"
 
 namespace Stroalgo::Configuration {
 
@@ -46,7 +48,7 @@ void Settings::CreateDefaultSettingsFile() {
   m_LoggerSettings.m_SettingLogPath = "LOGS";
   lSettingsTree.put<std::string>("Logger.LogPath",
                                  m_LoggerSettings.m_SettingLogPath);
-  CreateLogsFolder(m_LoggerSettings.m_SettingLogPath);
+  Common::Utils::CreateFolder(m_LoggerSettings.m_SettingLogPath);
 
   // Default log level is trace
   m_LoggerSettings.m_SettingLogLevel = boost::log::trivial::trace;
@@ -75,12 +77,6 @@ void Settings::CreateDefaultSettingsFile() {
   m_SettingsLoaded = true;
 }
 
-void Settings::CreateLogsFolder(const std::string& pLogsPath) {
-  if (!std::filesystem::exists(pLogsPath)) {
-    std::filesystem::create_directories(pLogsPath);
-  }
-}
-
 void Settings::LoadSettings() {
   try {
     // Load settings from file
@@ -92,7 +88,7 @@ void Settings::LoadSettings() {
     const std::string& lSettingPath{
         lSettingsTree.get<std::string>("Logger.LogPath")};
 
-    CreateLogsFolder(lSettingPath);
+    Common::Utils::CreateFolder(lSettingPath);
     m_LoggerSettings.m_SettingLogPath =
         std::filesystem::path(lSettingPath).make_preferred().string();
 
@@ -106,15 +102,21 @@ void Settings::LoadSettings() {
     // Check and Populate every module settings
     auto modulesSection = lSettingsTree.get_child("Modules");
     m_ModulesSettings.clear();
-    const boost::regex special_char_regex("[^a-zA-Z0-9_]");
+    auto isInvalidModuleName = [](const std::string& name) {
+      if (name.empty()) {
+        return true;
+      }
+      return std::any_of(name.begin(), name.end(), [](unsigned char c) {
+        return !(std::isalnum(c) || c == '_');
+      });
+    };
     for (const auto& module : modulesSection) {
       const std::string& lModuleName{module.first};
 
       // Validate ModuleName
-      if (boost::regex_search(lModuleName, special_char_regex)) {
-        throw Exceptions::LoggerException(
-            lModuleName +
-            "Module name ill formatted");  // Skip empty module names
+      if (isInvalidModuleName(lModuleName)) {
+        throw Exceptions::LoggerException(lModuleName +
+                                          "Module name ill formatted");
       } else {
         const boost::log::trivial::severity_level lModuleLogLevel{
             module.second.get_value<boost::log::trivial::severity_level>()};

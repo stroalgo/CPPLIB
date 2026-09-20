@@ -8,20 +8,27 @@
 
 #include <gtest/gtest.h>
 
+#include <boost/filesystem.hpp>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <system_error>
 
 #include "Constants.h"
 
 class SettingsManagerTest : public ::testing::Test {
  protected:
   void TearDown() override {
-    if (std::filesystem::exists("settings.ini")) {
-      std::filesystem::remove_all("settings.ini");
+    const std::filesystem::path settingsFile{"settings.ini"};
+    std::error_code ec;
+    if (std::filesystem::exists(settingsFile, ec)) {
+      std::filesystem::remove(settingsFile, ec);
     }
-    if (std::filesystem::exists("LOGS")) {
-      std::filesystem::remove_all("LOGS");
+
+    const boost::filesystem::path logsDir{"LOGS"};
+    boost::system::error_code logsError;
+    if (boost::filesystem::exists(logsDir, logsError)) {
+      boost::filesystem::remove_all(logsDir, logsError);
     }
   }
 
