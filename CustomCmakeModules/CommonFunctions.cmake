@@ -170,6 +170,15 @@ function(add_unit_test NAME)
   # Test target dependencies
   add_dependencies(${NAME}_test ${NAME})
 
+  # Keep shared-library dependencies next to the test executable so that
+  # GoogleTest discovery can launch it on Windows.
+  add_custom_command(
+    TARGET ${NAME}_test
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${NAME}_test>
+            $<TARGET_RUNTIME_DLLS:${NAME}_test>
+    COMMAND_EXPAND_LISTS)
+
   # Check memory usage
   memorycheck(${NAME}_test)
 endfunction()
