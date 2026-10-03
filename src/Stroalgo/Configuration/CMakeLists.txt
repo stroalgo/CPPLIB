@@ -33,6 +33,6 @@ endif()
 # Tests
 # -----------------------------------------------------------------------------
 if(BUILD_TESTING)
-  set(DEPENDENCIES)
+  set(DEPENDENCIES Boost::filesystem Boost::system)
   add_unit_test(${PROJECT_NAME} ${DEPENDENCIES})
 endif()

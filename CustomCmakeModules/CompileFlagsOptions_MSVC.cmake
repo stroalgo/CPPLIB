@@ -20,6 +20,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     /RELEASE # Sets the Checksum in the .exe header.
     /MD # Compiles to create a multithreaded DLL
   )
+  message(STATUS "🟢 MSVC RELEASE Compile options added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
   add_compile_options(
@@ -29,6 +30,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     /Os # Favors small code
     /Zi # Generates complete debugging information.
   )
+  message(STATUS "🟢 MSVC RELWITHDEBINFO Compile options added")
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_options(
@@ -60,6 +62,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     /LDd # Creates a debug dynamic-link library.
     /MDd # Compiles to create a debug multithreaded DLL
   )
+  message(STATUS "🟢 MSVC DEBUG Compile options added")
 endif()
 
 # ---------------------------------------------------------Compile Link

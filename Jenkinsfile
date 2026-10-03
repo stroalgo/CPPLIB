@@ -6,7 +6,7 @@ pipeline {
   parameters{
 
       //Enable Valgrind
-      booleanParam(name:'Valgrind', defaultValue: false, description:'Enable Valgrind for profiling Memory/Leak')
+      booleanParam(name:'Valgrind/DrMemory', defaultValue: true, description:'Enable Valgrind for profiling Memory/Leak')
 
       //Enable Documentation
       booleanParam(name:'Documentation', defaultValue: false, description:'Enable Doc Generation')
@@ -149,7 +149,7 @@ pipeline {
                 {
                   def buildOptions = " "
                   if (params.Valgrind) {
-                    buildOptions += " -DBUILD_WITH_MEMCHECK_VAL=ON "
+                    buildOptions += " -DBUILD_WITH_MEMCHECK_VAL_DRM=ON "
                   }
 
                   if (params.Documentation) {
@@ -285,10 +285,11 @@ pipeline {
               steps {
                 bat 'echo "Running Unit Tests..."'
                 bat """ctest -V --build-config ${params.BuildType} --test-dir build  --output-junit  unitTestReports.xml"""
+                stash name: 'drmemory-logs', includes: """build/drmemory_logs/**/results.txt"""
               }
               post {
                 success  {
-                    junit (testResults:"""build/${params.BuildType}/unitTestReports.xml""", allowEmptyResults : true)
+                    junit (testResults:"""build/unitTestReports.xml""", allowEmptyResults : true)
                 }
               }
 
@@ -355,6 +356,8 @@ pipeline {
                     if (params.WindowsBuild) {
                       unstash 'win_build'
                       sonarArgs << "-Dsonar.cxx.vc.reportPaths=win_build.log"
+                      unstash 'drmemory-logs'
+                      sonarArgs << "-Dsonar.cxx.drmemory.reportPaths=build/drmemory_logs/**/results.txt"
                     }
 
                     withSonarQubeEnv('sonarqube_cpplib') {

@@ -171,14 +171,6 @@ class Settings {
   void CreateDefaultSettingsFile();
 
   /**
-   * @brief Create logs folder if it does not exist
-   * @memberof Settings
-   * @param pLogsPath The path to the logs folder
-   * @private
-   */
-  void CreateLogsFolder(const std::string& pLogsPath);
-
-  /**
    * @brief Settings file path
    * @memberof SettingsManager
    * @private
